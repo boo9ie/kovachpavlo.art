@@ -4,60 +4,42 @@ This document describes the process of setting up and deploying the site on a cP
 
 **IMPORTANT: Because cPanel shared hosting environments vary, the most reliable method is to build the site locally and push the `dist` folder to GitHub.**
 
-## Part 1: Local Preparation & Build
+## Part 1: Automated Deployment Workflow (Рекомендованок)
 
-Before starting, ensure that **Node.js** and **Git** are installed on your computer.
+This project has a **GitHub Action** named `cpanel-deploy.yml` configured. 
+Every time you push a change to the `main` branch, GitHub will automatically:
+1. Build the project using Node.js/Vite.
+2. Put all production files in the `dist` folder.
+3. Push those files directly to a new branch called **`cpanel`**.
 
-1. **Install Dependencies:**
-   Open a terminal in the project folder and run:
-   ```bash
-   npm install
-   ```
-
-2. **Build the Project:**
-   This creates the `dist` folder which contains your actual website files.
-   ```bash
-   npm run build
-   ```
-
-3. **Initialize Git & Push:**
-   If you haven't already initialized git:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit with build"
-   git remote add origin <your_repo_link.git>
-   git push -u origin master
-   ```
-
-   *If you make future changes:*
-   1. Make your code changes.
-   2. Run `npm run build`.
-   3. `git add .`
-   4. `git commit -m "Update"`
-   5. `git push`
+This means you **never need to build locally** to deploy.
 
 ---
 
 ## Part 2: cPanel Configuration
 
+To connect this automated workflow to your cPanel hosting:
+
 ### Step 1: Git Version Control Setup
 1. Go to cPanel -> **Git™ Version Control**.
 2. Click **Create**.
-3. **Clone URL**: Paste your repository link.
-4. **Repository Path**: `repositories/pavlo-portfolio`.
-5. **Repository Name**: `pavlo-portfolio`.
-6. Click **Create**.
+3. **Clone URL**: Paste your repository link (`https://github.com/boo9ie/kovachpavlo.art.git`).
+4. **Repository Path**: `repositories/kovachpavlo.art` (or any path you prefer outside public_html).
+5. **Repository Name**: `kovachpavlo.art`.
+6. Click **Create** (this tracks the `main` branch by default).
 
----
+### Step 2: Switch to the Deployment Branch
+1. After creating, click **Manage** next to your repository.
+2. In the **Basic Information** tab, find **Checked-Out Branch**.
+3. Change it from `main` to **`cpanel`**.
+   *(Note: if `cpanel` doesn't exist yet, wait 1-2 minutes for the GitHub Action to finish its first run and refresh).*
+4. Click **Update**.
 
-## Part 3: Deployment
+### Step 3: Deploy to public_html
+1. Go to the **Pull or Deploy** tab.
+2. Click **Update from Remote**.
+3. Click **Deploy HEAD Commit**.
 
-The project includes a `.cpanel.yml` file that tells cPanel to copy the files from the `dist` folder to your public website folder.
+Because the `cpanel` branch only contains your final built files and the correct `.cpanel.yml`, your site will instantly go live in your `public_html` folder.
 
-1. In cPanel -> **Git™ Version Control**, click **Manage** next to your repository.
-2. Go to the **Pull or Deploy** tab.
-3. Click **Update from Remote** to fetch your latest commit (which includes the `dist` folder).
-4. Click **Deploy HEAD Commit**.
-
-Your site should now be live in your `public_html` folder.
+In the future, simply click **Update from Remote** and **Deploy HEAD Commit** whenever you push new changes to GitHub!
