@@ -1,0 +1,48 @@
+name: Build and Push for cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Copy backend files
+        run: |
+          mkdir -p dist/api
+          cp -r public/api/* dist/api/ || true
+
+      - name: Prepare cPanel deployment file
+        run: |
+          echo "---" > dist/.cpanel.yml
+          echo "deployment:" >> dist/.cpanel.yml
+          echo "  tasks:" >> dist/.cpanel.yml
+          echo "    - \"export DEPLOYPATH=/home/\$USER/public_html/\"" >> dist/.cpanel.yml
+          echo "    - \"/bin/cp -R * \$DEPLOYPATH\"" >> dist/.cpanel.yml
+
+      - name: Deploy to cPanel branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: cpanel
+          force_orphan: false
