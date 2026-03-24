@@ -26,10 +26,11 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Copy backend files
+      - name: Copy backend files and configs
         run: |
           mkdir -p dist/api
           cp -r public/api/* dist/api/ || true
+          cp .htaccess dist/ || true
 
       - name: Commit dist folder to main
         run: |

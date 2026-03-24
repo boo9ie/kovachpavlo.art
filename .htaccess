@@ -1,3 +1,5 @@
+# Prioritize our React App over legacy WordPress files
+DirectoryIndex index.html index.php
 
 # Enable Gzip Compression
 <IfModule mod_deflate.c>
