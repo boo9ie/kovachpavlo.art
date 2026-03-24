@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { HashRouter, Routes, Route, Link, useLocation, useParams, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation, useParams } from 'react-router-dom';
 import { 
   INITIAL_NEWS, 
   INITIAL_EXHIBITIONS, 
