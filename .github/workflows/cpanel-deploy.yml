@@ -31,18 +31,10 @@ jobs:
           mkdir -p dist/api
           cp -r public/api/* dist/api/ || true
 
-      - name: Prepare cPanel deployment file
+      - name: Commit dist folder to main
         run: |
-          echo "---" > dist/.cpanel.yml
-          echo "deployment:" >> dist/.cpanel.yml
-          echo "  tasks:" >> dist/.cpanel.yml
-          echo "    - \"export DEPLOYPATH=/home/\$USER/public_html/\"" >> dist/.cpanel.yml
-          echo "    - \"/bin/cp -R * \$DEPLOYPATH\"" >> dist/.cpanel.yml
-
-      - name: Deploy to cPanel branch
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: cpanel
-          force_orphan: false
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add dist/ -f
+          git commit -m "chore: automated build [skip ci]" || echo "No changes to commit"
+          git push origin main
