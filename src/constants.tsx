@@ -122,7 +122,7 @@ export const INITIAL_ABOUT: AboutData = {
 };
 
 export const INITIAL_CONTACT: ContactData = {
-  email: 'pavlo@pavlokovach.art',
+  email: 'kovach.pavlo@gmail.com',
   facebook: 'pavlo.kovach',
   whatsapp: '+380639407881'
 };

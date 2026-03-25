@@ -29,7 +29,7 @@ jobs:
       - name: Copy backend files and configs
         run: |
           mkdir -p dist/api
-          cp -r public/api/* dist/api/ || true
+          rsync -av --exclude='data.json' public/api/ dist/api/ || true
           cp .htaccess dist/ || true
 
       - name: Commit dist folder to main
