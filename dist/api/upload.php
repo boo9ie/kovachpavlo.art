@@ -15,6 +15,7 @@ if (!file_exists($uploadDir)) {
 }
 
 if (!isset($_FILES['file'])) {
+    error_log("Upload Error: No file uploaded.");
     http_response_code(400);
     echo json_encode(['error' => 'No file uploaded']);
     exit;
@@ -25,6 +26,7 @@ $file = $_FILES['file'];
 // Basic security check
 $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
 if (!in_array($file['type'], $allowedTypes)) {
+    error_log("Upload Error: Invalid file type ({$file['type']}).");
     http_response_code(400);
     echo json_encode(['error' => 'Invalid file type']);
     exit;
@@ -41,6 +43,7 @@ if (move_uploaded_file($file['tmp_name'], $destination)) {
     $url = './uploads/' . $filename;
     echo json_encode(['success' => true, 'url' => $url]);
 } else {
+    error_log("Upload Error: Failed to move uploaded file {$file['tmp_name']} to {$destination}. Check permissions.");
     http_response_code(500);
     echo json_encode(['error' => 'Failed to move uploaded file']);
 }
