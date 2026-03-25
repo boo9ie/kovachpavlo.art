@@ -96,8 +96,17 @@ export const MediaPreview = ({ item, isHovered }: { item?: MediaItem, isHovered:
 
   if (error) {
     return (
-      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-[10px] uppercase font-bold text-gray-400">
-        Media Error
+      <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center p-4">
+        <span className="text-[10px] uppercase font-bold text-[#b20000] mb-2 text-center">Codec Not Supported</span>
+        <a 
+          href={item.url} 
+          download 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-[9px] uppercase font-bold text-black border border-black px-3 py-1 hover:bg-black hover:text-white transition-colors mt-2"
+        >
+          Download File
+        </a>
       </div>
     );
   }
