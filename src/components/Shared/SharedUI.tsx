@@ -1,0 +1,149 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { MediaItem } from '../../types';
+
+export const MetadataLabel = ({ label, value }: { label: string, value: string }) => (
+  <div className="flex flex-col mb-2">
+    <span className="text-[10px] uppercase font-bold text-gray-400 leading-none mb-1">{label}</span>
+    <span className="text-[12px] uppercase tracking-wide">{value}</span>
+  </div>
+);
+
+export const FormLabel = ({ children, required = false }: { children?: React.ReactNode, required?: boolean }) => (
+  <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1 tracking-widest">
+    {children} {required && <span className="text-[#b20000]">*</span>}
+  </label>
+);
+
+export const AdminInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+  <input 
+    {...props} 
+    className={`w-full p-3 border border-gray-300 text-xs bg-white text-black focus:border-black outline-none transition-colors ${props.className || ''}`} 
+  />
+);
+
+export const AdminTextarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
+  <textarea 
+    {...props} 
+    className={`w-full p-3 border border-gray-300 text-xs bg-white text-black focus:border-black outline-none transition-colors ${props.className || ''}`} 
+  />
+);
+
+export const ExpandableText = ({ text, limit = 160, className = "text-sm text-gray-700 leading-relaxed" }: { text: string; limit?: number; className?: string }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const safeText = text || '';
+  const shouldTruncate = safeText.length > limit;
+
+  if (!shouldTruncate) {
+    return <div className={className}>{safeText}</div>;
+  }
+
+  return (
+    <div className={className}>
+      {isExpanded ? safeText : `${safeText.substring(0, limit)}...`}
+      <button 
+        onClick={(e) => { e.preventDefault(); setIsExpanded(!isExpanded); }}
+        className="ml-2 text-[10px] font-bold text-[#b20000] hover:underline uppercase tracking-tighter inline-block align-baseline"
+      >
+        {isExpanded ? '[ less ]' : '[ more ]'}
+      </button>
+    </div>
+  );
+};
+
+export const MediaPreview = ({ item, isHovered }: { item?: MediaItem, isHovered: boolean }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [error, setError] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  const PREVIEW_TIME = 0.7;
+
+  if (!item) {
+    return (
+      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-[10px] uppercase font-bold text-gray-400 border border-gray-200">
+        No Media
+      </div>
+    );
+  }
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (item.type === 'video' && video) {
+      if (isHovered) {
+        video.currentTime = 0;
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
+      } else {
+        video.pause();
+        video.currentTime = PREVIEW_TIME; 
+      }
+    }
+  }, [isHovered, item.type]);
+
+  const handleLoadedMetadata = () => {
+    const video = videoRef.current;
+    if (video) {
+      video.currentTime = PREVIEW_TIME;
+    }
+  };
+
+  const handleSeeked = () => {
+    setIsReady(true);
+  };
+
+  const filterClass = isHovered ? 'grayscale-0 brightness-100' : 'grayscale brightness-90 contrast-125';
+
+  if (error) {
+    return (
+      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-[10px] uppercase font-bold text-gray-400">
+        Media Error
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full bg-[#f0f0f0] overflow-hidden">
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="w-6 h-6 border-2 border-black border-t-transparent animate-spin"></div>
+        </div>
+      )}
+      
+      {item.type === 'video' ? (
+        <video 
+          ref={videoRef}
+          src={item.url} 
+          muted 
+          loop 
+          playsInline
+          preload="auto"
+          onLoadedMetadata={handleLoadedMetadata}
+          onSeeked={handleSeeked}
+          onError={() => setError(true)}
+          className={`w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${filterClass} ${isReady ? 'opacity-100' : 'opacity-0'}`}
+        />
+      ) : (
+        <img 
+          src={item.url} 
+          alt="Preview" 
+          onLoad={() => setIsReady(true)}
+          onError={() => setError(true)}
+          className={`w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${filterClass} ${isReady ? 'opacity-100' : 'opacity-0'}`} 
+        />
+      )}
+      
+      {item.type === 'video' && isReady && (
+        <div className="absolute top-3 right-3 bg-black/80 text-white text-[8px] px-2 py-0.5 font-bold uppercase tracking-[0.2em] pointer-events-none z-20">
+          {isHovered ? 'Playing' : 'Video'}
+        </div>
+      )}
+      
+      {item.photographer && isReady && (
+        <div className={`absolute bottom-3 left-3 bg-black/90 text-white text-[8px] px-2.5 py-1 font-bold uppercase tracking-[0.1em] backdrop-blur-sm transition-opacity duration-500 pointer-events-none z-20 ${isHovered ? 'opacity-100' : 'opacity-40'}`}>
+          Photo: {item.photographer}
+        </div>
+      )}
+    </div>
+  );
+};
