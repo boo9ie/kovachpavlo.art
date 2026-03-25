@@ -230,8 +230,9 @@ export const AdminPanel = ({
           } else {
              alert(`Failed to upload ${file.name}`);
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error("Upload error:", err);
+          alert(`Error uploading ${file.name}: ${err.message || 'Unknown network error. File may be too large.'}`);
         }
 
         processed++;
