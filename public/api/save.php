@@ -12,6 +12,7 @@ $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 
 if (!$data) {
+    error_log("Save Error: Invalid JSON received in payload.");
     http_response_code(400);
     echo json_encode(['error' => 'Invalid JSON']);
     exit;
@@ -21,6 +22,7 @@ $file = 'data.json';
 if (file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
     echo json_encode(['success' => true]);
 } else {
+    error_log("Save Error: file_put_contents failed to write to data.json. Check permissions.");
     http_response_code(500);
     echo json_encode(['error' => 'Failed to save data']);
 }

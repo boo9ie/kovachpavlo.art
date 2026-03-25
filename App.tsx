@@ -123,15 +123,16 @@ const AdminTextarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>)
 
 const ExpandableText = ({ text, limit = 160, className = "text-sm text-gray-700 leading-relaxed" }: { text: string; limit?: number; className?: string }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const shouldTruncate = text.length > limit;
+  const safeText = text || '';
+  const shouldTruncate = safeText.length > limit;
 
   if (!shouldTruncate) {
-    return <div className={className}>{text}</div>;
+    return <div className={className}>{safeText}</div>;
   }
 
   return (
     <div className={className}>
-      {isExpanded ? text : `${text.substring(0, limit)}...`}
+      {isExpanded ? safeText : `${safeText.substring(0, limit)}...`}
       <button 
         onClick={(e) => { e.preventDefault(); setIsExpanded(!isExpanded); }}
         className="ml-2 text-[10px] font-bold text-[#b20000] hover:underline uppercase tracking-tighter inline-block align-baseline"
@@ -256,7 +257,7 @@ const Home = ({ items }: { items: ExhibitionItem[] }) => {
           <div key={item.id} className="grid grid-cols-1 lg:grid-cols-12 gap-12 border-b border-gray-100 pb-24 last:border-0">
             <div className="lg:col-span-8">
               <Link to={`/exhibition/${item.id}`} className="block group overflow-hidden bg-gray-100 border border-gray-200 relative aspect-[16/10]">
-                <MediaPreview item={item.photos[0]} isHovered={false} />
+                <MediaPreview item={(item.photos || [])[0]} isHovered={false} />
               </Link>
             </div>
             <div className="lg:col-span-4 flex flex-col justify-end">
@@ -307,7 +308,7 @@ const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
           ref={scrollRef}
           className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-4 pb-8"
         >
-          {item.photos.map((photo, idx) => (
+          {(item.photos || []).map((photo, idx) => (
             <div 
               key={idx} 
               className="flex-shrink-0 w-full md:w-3/4 lg:w-2/3 snap-center cursor-zoom-in relative group/photo h-[60vh] bg-gray-50 overflow-hidden border border-gray-200"
@@ -373,7 +374,7 @@ const WorkDetail = ({ items }: { items: WorkItem[] }) => {
   const [activeMedia, setActiveMedia] = useState<MediaItem | null>(null);
 
   useEffect(() => {
-    if (item && item.media.length > 0) {
+    if (item && item.media && item.media.length > 0) {
       setActiveMedia(item.media[0]);
     }
   }, [item]);
@@ -406,7 +407,7 @@ const WorkDetail = ({ items }: { items: WorkItem[] }) => {
           </div>
           
           <div className="flex gap-4 mt-8 overflow-x-auto pb-4 no-scrollbar">
-            {item.media.map((m, idx) => (
+            {(item.media || []).map((m, idx) => (
               <button 
                 key={idx} 
                 onClick={() => setActiveMedia(m)}
@@ -480,7 +481,7 @@ const WorksPage = ({ items }: { items: WorkItem[] }) => {
           >
             <div className="aspect-square bg-gray-50 mb-6 border border-gray-200 overflow-hidden relative shadow-sm">
               <MediaPreview 
-                item={item.media[0]} 
+                item={(item.media || [])[0]} 
                 isHovered={hoveredId === item.id} 
               />
             </div>
@@ -601,6 +602,8 @@ const AdminPanel = ({
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [diskSpace, setDiskSpace] = useState<any>(null);
   const [newPassword, setNewPassword] = useState('');
   
   // Form States
@@ -627,6 +630,12 @@ const AdminPanel = ({
 
     updateLockout();
     timer = setInterval(updateLockout, 1000);
+
+    fetch('/api/sysinfo.php')
+      .then(res => res.json())
+      .then(data => setDiskSpace(data))
+      .catch(console.error);
+
     return () => clearInterval(timer);
   }, [lockoutUntil]);
 
@@ -668,6 +677,7 @@ const AdminPanel = ({
     setNewExhib({ photos: [] });
     setNewWork({ media: [] });
     setIsUploading(false);
+    setUploadProgress(0);
   };
 
   const handleLogout = () => {
@@ -742,11 +752,35 @@ const AdminPanel = ({
         formData.append('file', file);
         
         try {
-          const res = await fetch(API_UPLOAD_URL, {
-            method: 'POST',
-            body: formData
+          setUploadProgress(0);
+          const res = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', API_UPLOAD_URL);
+            
+            xhr.upload.onprogress = (event) => {
+              if (event.lengthComputable) {
+                const percentComplete = Math.round((event.loaded / event.total) * 100);
+                setUploadProgress(percentComplete);
+              }
+            };
+            
+            xhr.onload = () => {
+              if (xhr.status === 200) {
+                try {
+                  resolve(JSON.parse(xhr.responseText));
+                } catch (e) {
+                  reject(new Error("Invalid JSON response"));
+                }
+              } else {
+                reject(new Error(xhr.statusText));
+              }
+            };
+            
+            xhr.onerror = () => reject(new Error('Network Error'));
+            xhr.send(formData);
           });
-          const data = await res.json();
+          
+          const data: any = res;
           
           if (data.success && data.url) {
             const url = data.url;
@@ -769,6 +803,7 @@ const AdminPanel = ({
         }
 
         processed++;
+        setUploadProgress(0);
         if (processed === fileList.length) setIsUploading(false);
       }
     }
@@ -865,6 +900,11 @@ const AdminPanel = ({
           ))}
         </div>
         <div className="pb-4 text-[9px] font-bold uppercase flex items-center gap-6">
+          {diskSpace && (
+            <div className="text-gray-500 border-r border-gray-300 pr-4">
+              Storage <span className="text-black">{diskSpace.percent_used}%</span> ({diskSpace.used_formatted} / {diskSpace.total_formatted} Free: {diskSpace.free_formatted})
+            </div>
+          )}
           <button type="button" onClick={handleLogout} className="text-gray-500 hover:text-black">Logout Session</button>
           <button type="button" onClick={handleClearStorage} className="text-[#b20000] underline decoration-dotted underline-offset-4">Reset Archive</button>
         </div>
@@ -872,7 +912,12 @@ const AdminPanel = ({
 
       <div className="bg-gray-50 p-8 border border-gray-200 min-h-[500px]">
         {isUploading && (
-          <div className="mb-8 p-4 bg-black text-white uppercase text-[10px] font-bold animate-pulse">Processing Files...</div>
+          <div className="mb-8 p-4 bg-black text-white uppercase text-[10px] font-bold text-center">
+            <div className="mb-2 animate-pulse">Uploading Media... {uploadProgress}%</div>
+            <div className="w-full bg-gray-800 h-1">
+              <div className="bg-[#b20000] h-1 transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+            </div>
+          </div>
         )}
 
         {activeTab === 'news' && (
