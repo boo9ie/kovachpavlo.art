@@ -6,8 +6,7 @@ export const NAV_ITEMS = [
   { name: 'News', path: '/news' },
   { name: 'Works', path: '/works' },
   { name: 'About', path: '/about' },
-  { name: 'Contact', path: '/contact' },
-  { name: '[Admin]', path: '/admin', color: 'text-[#b20000]' }
+  { name: 'Contact', path: '/contact' }
 ];
 
 export const Navigation = () => {
