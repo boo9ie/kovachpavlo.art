@@ -119,16 +119,7 @@ export default function App() {
             } />
           </Routes>
         </main>
-        <footer className="bg-black text-white py-12 px-4 md:px-8 mt-auto">
-          <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
-            <Link to="/" className="text-xl font-bold tracking-tighter uppercase leading-none hover:text-[#b20000]">PAVLO KOVACH</Link>
-            <div className="flex flex-wrap gap-x-8 gap-y-4">
-              {NAV_ITEMS.map((item) => (
-                <Link key={item.path} to={item.path} className={`text-[11px] font-bold uppercase tracking-widest ${item.color || 'hover:text-gray-400'}`}>{item.name}</Link>
-              ))}
-            </div>
-          </div>
-        </footer>
+
       </div>
     </HashRouter>
   );
