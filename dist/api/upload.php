@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(["lifetime" => 86400, "path" => "/", "samesite" => "Lax"]);
 session_start();
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*';
 if ($origin !== '*') {
