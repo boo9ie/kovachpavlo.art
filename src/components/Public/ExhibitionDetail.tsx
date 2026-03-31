@@ -37,7 +37,9 @@ export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
               onClick={() => setSelectedMedia(photo)}
             >
               {photo.type === 'video' ? (
-                <video src={photo.url} muted loop playsInline preload="none" className="w-full h-full object-cover grayscale group-hover/photo:grayscale-0 transition-all duration-700" onMouseEnter={e => e.currentTarget.play()} onMouseLeave={e => { e.currentTarget.pause(); e.currentTarget.currentTime = 0.7; }} />
+                <video key={photo.url} muted loop playsInline preload="none" className="w-full h-full object-cover grayscale group-hover/photo:grayscale-0 transition-all duration-700" onMouseEnter={e => e.currentTarget.play()} onMouseLeave={e => { e.currentTarget.pause(); e.currentTarget.currentTime = 0.7; }}>
+                  <source src={photo.url} type={photo.url.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+                </video>
               ) : (
                 <img src={photo.url} alt={`${item.title} - ${idx}`} loading="lazy" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
               )}
@@ -74,7 +76,9 @@ export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
           <button className="fixed top-8 right-8 text-black font-bold uppercase text-xs border border-black px-4 py-2 hover:bg-black hover:text-white z-10">CLOSE</button>
           <div className="w-full h-full flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
             {selectedMedia.type === 'video' ? (
-              <video src={selectedMedia.url} controls autoPlay playsInline className="max-w-full max-h-[85vh] object-contain" />
+              <video key={selectedMedia.url} controls autoPlay playsInline className="max-w-full max-h-[85vh] object-contain">
+                <source src={selectedMedia.url} type={selectedMedia.url.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+              </video>
             ) : (
               <img src={selectedMedia.url} alt="Zoomed view" loading="lazy" className="max-w-full max-h-[85vh] object-contain" />
             )}

@@ -27,7 +27,9 @@ export const WorkDetail = ({ items }: { items: WorkItem[] }) => {
           <div className="aspect-video bg-gray-50 border border-gray-200 overflow-hidden relative shadow-inner group flex items-center justify-center">
             {activeMedia ? (
               activeMedia.type === 'video' ? (
-                <video key={activeMedia.url} src={activeMedia.url} controls autoPlay muted playsInline className="w-full h-full object-contain" />
+                <video key={activeMedia.url} controls autoPlay muted playsInline className="w-full h-full object-contain">
+                  <source src={activeMedia.url} type={activeMedia.url.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+                </video>
               ) : (
                 <img key={activeMedia.url} src={activeMedia.url} alt={item.title} loading="lazy" className="w-full h-full object-contain" />
               )

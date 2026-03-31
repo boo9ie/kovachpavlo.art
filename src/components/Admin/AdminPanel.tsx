@@ -171,7 +171,7 @@ export const AdminPanel = ({
       let processed = 0;
 
       for (const file of fileList) {
-        const MAX_SIZE = 50 * 1024 * 1024; 
+        const MAX_SIZE = 2 * 1024 * 1024 * 1024; // 2 GB
         if (file.size > MAX_SIZE) {
           alert(`File ${file.name} is too large.`);
           processed++;
@@ -374,9 +374,10 @@ export const AdminPanel = ({
                     {newNews.photo ? (
                       <div className="relative"><img src={newNews.photo} className="w-full h-40 object-cover border" /><button type="button" onClick={() => setNewNews({...newNews, photo: undefined})} className="absolute top-2 right-2 bg-black text-white p-1 text-[8px] uppercase">Change</button></div>
                     ) : (
-                      <div className="w-full h-40 border-2 border-dashed border-gray-300 flex items-center justify-center bg-white">
+                      <div className="w-full h-40 border-2 border-dashed border-gray-300 flex flex-col gap-2 items-center justify-center bg-white">
                         <input type="file" accept="image/*" className="hidden" id="news-up" onChange={e => handleMediaUpload(e, 'news')} />
-                        <label htmlFor="news-up" className="cursor-pointer uppercase text-[10px] font-bold text-gray-400">Upload Thumbnail</label>
+                        <label htmlFor="news-up" className="cursor-pointer uppercase text-[10px] font-bold text-gray-400 hover:text-black transition-colors">Upload Thumbnail</label>
+                        <span className="text-[9px] text-gray-400 text-center uppercase leading-tight font-medium px-2">Max: 2GB<br/>Formats: JPG, PNG, WEBP</span>
                       </div>
                     )}
                   </div>
@@ -444,9 +445,10 @@ export const AdminPanel = ({
                           <button type="button" onClick={() => setNewExhib({...newExhib, photos: newExhib.photos?.filter((_, idx) => idx !== i)})} className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 flex items-center justify-center text-[10px]">×</button>
                         </div>
                       ))}
-                      <label className="border-2 border-dashed flex flex-col items-center justify-center aspect-square cursor-pointer bg-white hover:bg-gray-50">
+                      <label className="border-2 border-dashed flex flex-col items-center justify-center aspect-square cursor-pointer bg-white hover:bg-gray-50 p-2 text-center transition-colors">
                         <input type="file" multiple className="hidden" onChange={e => handleMediaUpload(e, 'exhib')} />
-                        <span className="text-[10px] font-bold text-gray-400">+ ADD MEDIA</span>
+                        <span className="text-[10px] font-bold text-gray-400 mb-1.5 hover:text-black transition-colors">+ ADD MEDIA</span>
+                        <span className="text-[8px] text-gray-400 uppercase leading-tight font-medium">Max: 2GB per file<br/>Photo: JPG, PNG<br/>Video: MP4 (H.264), WEBM</span>
                       </label>
                     </div>
                  </div>
@@ -510,9 +512,10 @@ export const AdminPanel = ({
                           <button type="button" onClick={() => setNewWork({...newWork, media: newWork.media?.filter((_, idx) => idx !== i)})} className="absolute top-1 right-1 bg-[#b20000] text-white w-5 h-5 flex items-center justify-center text-[10px] font-bold">×</button>
                         </div>
                       ))}
-                      <label className="border-2 border-dashed flex flex-col items-center justify-center aspect-square cursor-pointer bg-white hover:bg-gray-50">
+                      <label className="border-2 border-dashed flex flex-col items-center justify-center aspect-square cursor-pointer bg-white hover:bg-gray-50 p-2 text-center transition-colors">
                         <input type="file" multiple className="hidden" onChange={e => handleMediaUpload(e, 'work')} />
-                        <span className="text-[10px] font-bold text-gray-400">+ ADD FILE</span>
+                        <span className="text-[10px] font-bold text-gray-400 mb-1.5 hover:text-black transition-colors">+ ADD FILE</span>
+                        <span className="text-[8px] text-gray-400 uppercase leading-tight font-medium">Max: 2GB per file<br/>Photo: JPG, PNG<br/>Video: MP4 (H.264), WEBM</span>
                       </label>
                     </div>
                  </div>
@@ -549,9 +552,10 @@ export const AdminPanel = ({
                  <FormLabel>Artist Identity Photo</FormLabel>
                  <div className="relative border border-black overflow-hidden group">
                     <img src={editAbout.photo} className="w-full grayscale" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                       <input type="file" id="about-photo" className="hidden" onChange={e => handleMediaUpload(e, 'about')} />
-                       <label htmlFor="about-photo" className="cursor-pointer bg-white px-4 py-2 text-[10px] font-bold uppercase">Change Image</label>
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3">
+                       <input type="file" id="about-photo" accept="image/*" className="hidden" onChange={e => handleMediaUpload(e, 'about')} />
+                       <label htmlFor="about-photo" className="cursor-pointer bg-white px-4 py-2 text-[10px] font-bold uppercase transition-colors hover:bg-gray-200">Change Image</label>
+                       <span className="text-[9px] text-white/90 text-center uppercase leading-tight font-medium px-2">Max: 2GB<br/>Formats: JPG, PNG, WEBP</span>
                     </div>
                  </div>
                  <div className="mt-8 border-t border-black pt-4">

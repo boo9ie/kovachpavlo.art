@@ -55,6 +55,11 @@ export const MediaPreview = ({ item, isHovered }: { item?: MediaItem, isHovered:
   const [error, setError] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
+  useEffect(() => {
+    setError(false);
+    setIsReady(false);
+  }, [item?.url]);
+
   const PREVIEW_TIME = 0.7;
 
   if (!item) {
@@ -121,17 +126,22 @@ export const MediaPreview = ({ item, isHovered }: { item?: MediaItem, isHovered:
       
       {item.type === 'video' ? (
         <video 
+          key={item.url}
           ref={videoRef}
-          src={item.url} 
           muted 
           loop 
           playsInline
-          preload="auto"
+          preload="metadata"
           onLoadedMetadata={handleLoadedMetadata}
           onSeeked={handleSeeked}
-          onError={() => setError(true)}
+          onError={(e) => {
+            console.error("Video load error for", item.url, e);
+            setError(true);
+          }}
           className={`w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${filterClass} ${isReady ? 'opacity-100' : 'opacity-0'}`}
-        />
+        >
+          <source src={item.url} type={item.url.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+        </video>
       ) : (
         <img 
           src={item.url} 
