@@ -232,6 +232,11 @@ export const AdminPanel = ({
           }
         } catch (err: any) {
           console.error("Upload error:", err);
+          if (err.message === 'Unauthorized' || err.message.includes('401')) {
+            alert("Сесія завершилася. Будь ласка, увійдіть знову.");
+            handleLogout();
+            return;
+          }
           alert(`Error uploading ${file.name}: ${err.message || 'Unknown network error. File may be too large.'}`);
         }
 

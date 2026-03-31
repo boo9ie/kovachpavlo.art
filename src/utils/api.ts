@@ -10,6 +10,9 @@ export const apiPost = async (url: string, payload: any) => {
       credentials: 'include',
       body: JSON.stringify(payload)
     });
+    if (response.status === 401) {
+      throw new Error('Unauthorized');
+    }
     return await response.json();
   } catch (error) {
     console.error('API Error:', error);
