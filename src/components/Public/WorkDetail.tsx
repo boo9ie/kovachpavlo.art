@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { WorkItem, MediaItem } from '../../types';
 import { MetadataLabel } from '../Shared/SharedUI';
+import { formatDate } from '../../utils/formatDate';
 
 export const WorkDetail = ({ items }: { items: WorkItem[] }) => {
   const { id } = useParams();
@@ -64,10 +65,10 @@ export const WorkDetail = ({ items }: { items: WorkItem[] }) => {
         </div>
 
         <div className="lg:col-span-4 border-t-2 border-black pt-4">
-          <h2 className="text-3xl md:text-4xl font-bold uppercase mb-6 leading-tight tracking-tighter">
+          <h2 className="text-3xl md:text-4xl font-bold uppercase mb-6 leading-tight tracking-normal">
             {item.title}
           </h2>
-          <MetadataLabel label="Project Year" value={item.date} />
+          <MetadataLabel label="Project Year" value={formatDate(item.date)} />
           <div className="mt-8 text-xl text-black leading-relaxed font-medium">
             {item.description}
           </div>

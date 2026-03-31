@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ExhibitionItem, MediaItem } from '../../types';
 import { MetadataLabel } from '../Shared/SharedUI';
+import { formatDate } from '../../utils/formatDate';
 
 export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
   const { id } = useParams();
@@ -61,7 +62,7 @@ export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-12 border-t border-black pt-12">
         <div className="lg:col-span-4 space-y-6">
-          <MetadataLabel label="Date" value={item.date} />
+          <MetadataLabel label="Date" value={formatDate(item.date)} />
           <MetadataLabel label="Venue" value={item.location} />
         </div>
         <div className="lg:col-span-8">

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ExhibitionItem } from '../../types';
 import { MediaPreview, MetadataLabel, ExpandableText } from '../Shared/SharedUI';
+import { formatDate } from '../../utils/formatDate';
 
 export const Home = ({ items }: { items: ExhibitionItem[] }) => {
   const sortedItems = [...items].sort((a, b) => {
@@ -23,12 +24,12 @@ export const Home = ({ items }: { items: ExhibitionItem[] }) => {
             <div className="lg:col-span-4 flex flex-col justify-end">
               <div className="border-t-2 border-black pt-4 mb-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <MetadataLabel label="Date" value={item.date} />
+                  <MetadataLabel label="Date" value={formatDate(item.date)} />
                   <MetadataLabel label="Location" value={item.location} />
                 </div>
               </div>
               <Link to={`/exhibition/${item.id}`} className="group inline-block">
-                <h2 className="text-4xl md:text-5xl font-bold uppercase mb-4 leading-none tracking-tighter group-hover:text-[#b20000] transition-colors">
+                <h2 className="text-4xl md:text-5xl font-bold uppercase mb-4 leading-none tracking-normal group-hover:text-[#b20000] transition-colors">
                   {item.title}
                 </h2>
               </Link>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { formatDate } from '../../utils/formatDate';
 import { WorkItem } from '../../types';
 import { MediaPreview, ExpandableText } from '../Shared/SharedUI';
 
@@ -26,7 +27,7 @@ export const WorksPage = ({ items }: { items: WorkItem[] }) => {
             <div className="border-t border-black pt-4">
                <div className="flex justify-between items-start">
                  <h3 className="text-xl font-bold uppercase leading-tight group-hover:text-[#b20000] transition-colors">{item.title}</h3>
-                 <span className="text-xs font-bold text-[#b20000]">{item.date}</span>
+                 <span className="text-xs font-bold text-black">{formatDate(item.date)}</span>
                </div>
                <ExpandableText 
                   text={item.description} 

@@ -19,7 +19,7 @@ export const Navigation = () => {
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 uppercase text-[11px] font-bold tracking-widest">
           <Link 
             to="/" 
-            className={`text-xl font-bold tracking-tighter mr-auto ${location.pathname === '/' ? 'text-[#b20000]' : ''}`}
+            className="w-full md:w-auto mb-4 md:mb-0 text-2xl md:text-xl font-bold text-black uppercase mr-auto tracking-normal block md:inline-block"
           >
             PAVLO KOVACH
           </Link>
