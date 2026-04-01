@@ -44,10 +44,14 @@ export const SeoManager = ({ exhibitions, works }: { exhibitions: ExhibitionItem
     let image = defaultImage;
     let canonicalPath = path || '/';
 
-    if (path === '/' || path === '/exhibitions') {
+    if (path === '/') {
       title = `${SITE_NAME} | Exhibitions`;
       description = 'Selected exhibitions, installations, and documentation from the practice of Pavlo Kovach.';
       canonicalPath = '/';
+    } else if (path === '/exhibitions') {
+      title = `${SITE_NAME} | Exhibitions`;
+      description = 'Selected exhibitions, installations, and documentation from the practice of Pavlo Kovach.';
+      canonicalPath = '/exhibitions';
     } else if (path === '/news') {
       title = `${SITE_NAME} | News`;
       description = 'Recent announcements, exhibitions, and external features related to Pavlo Kovach.';

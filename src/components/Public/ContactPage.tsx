@@ -12,25 +12,29 @@ export const ContactPage = ({ data }: { data: ContactData }) => (
       </div>
 
       <div className="space-y-8">
-        <div className="flex flex-col gap-1">
-          <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Electronic Mail</span>
-          <a 
-            href={`mailto:${data.email}`} 
-            className="text-base md:text-lg font-medium hover:text-[#b20000] transition-colors duration-300 lowercase"
-          >
-            {data.email}
-          </a>
-        </div>
+        {data.email ? (
+          <div className="flex flex-col gap-1">
+            <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Electronic Mail</span>
+            <a
+              href={`mailto:${data.email}`}
+              className="text-base md:text-lg font-medium hover:text-[#b20000] transition-colors duration-300 lowercase"
+            >
+              {data.email}
+            </a>
+          </div>
+        ) : null}
         
-        <div className="flex flex-col gap-1">
-          <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Mobile / WhatsApp</span>
-          <a 
-            href={`tel:${data.whatsapp}`} 
-            className="text-base md:text-lg font-medium hover:text-[#b20000] transition-colors duration-300"
-          >
-            {data.whatsapp}
-          </a>
-        </div>
+        {data.whatsapp ? (
+          <div className="flex flex-col gap-1">
+            <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Mobile / WhatsApp</span>
+            <a
+              href={`tel:${data.whatsapp}`}
+              className="text-base md:text-lg font-medium hover:text-[#b20000] transition-colors duration-300"
+            >
+              {data.whatsapp}
+            </a>
+          </div>
+        ) : null}
 
         {data.facebook && (
           <div className="flex flex-col gap-1">
@@ -43,6 +47,12 @@ export const ContactPage = ({ data }: { data: ContactData }) => (
             >
               {data.facebook}
             </a>
+          </div>
+        )}
+
+        {!data.email && !data.whatsapp && !data.facebook && (
+          <div className="text-sm uppercase font-medium tracking-wider text-gray-400">
+            Contact details will be published soon.
           </div>
         )}
       </div>

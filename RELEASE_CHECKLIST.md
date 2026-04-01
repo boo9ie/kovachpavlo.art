@@ -50,7 +50,7 @@ Use this checklist after the GitHub Actions build finishes and cPanel has deploy
 - [ ] `public_html/.well-known` is still present after deploy
 - [ ] `/home/USERNAME/private/config.php` was not overwritten during deploy
 - [ ] `/home/USERNAME/private/content.json` was not overwritten during redeploy
-- [ ] Production does not show bundled demo content when `/api/content.php` fails
+- [ ] Production does not show any bundled fallback content when `/api/content.php` fails
 
 ## Legacy Cleanup
 

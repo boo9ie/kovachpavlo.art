@@ -124,7 +124,7 @@ Then verify:
 - save updates persist after reload
 - image upload works
 - video upload works
-- production does not show bundled demo content if `/api/content.php` fails
+- production does not show any bundled fallback content if `/api/content.php` fails
 - news entries open real external URLs and do not render broken `#` links
 - `wp-admin`, `wp-content`, and `wp-includes` no longer resolve as live legacy content
 

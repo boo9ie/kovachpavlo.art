@@ -30,8 +30,8 @@ Prerequisites:
 Notes:
 - `npm run dev` covers the React frontend.
 - Admin login, save, upload, and logout are PHP endpoints under `public/api/`. To test the full admin flow locally you need a PHP-capable host or staging environment that serves those endpoints.
-- Bundled `INITIAL_*` demo content is used only in development when the PHP API is unavailable.
-- Production must load live content from `/api/content.php`; if that fails, the site shows an explicit error state instead of demo content.
+- Bundled `INITIAL_*` fallback data is intentionally empty and used only in development when the PHP API is unavailable.
+- Production must load live content from `/api/content.php`; if that fails, the site shows an explicit error state instead of any bundled content.
 - `npm run build` automatically copies the root `.htaccess` into `dist/.htaccess`, so the deployable output keeps HTTPS, apex-host, and SPA rewrite rules.
 
 ## Build Output
