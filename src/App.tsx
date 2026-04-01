@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { 
   INITIAL_NEWS, 
   INITIAL_EXHIBITIONS, 
@@ -14,10 +14,8 @@ import {
 
 import { API_DATA_URL, API_SAVE_URL, apiPost, apiGet } from './utils/api';
 
-import { Navigation, NAV_ITEMS } from './components/Shared/Navigation';
-
-
-
+import { Navigation } from './components/Shared/Navigation';
+import { SeoManager } from './components/Shared/SeoManager';
 import { Home } from './components/Public/Home';
 import { ExhibitionDetail } from './components/Public/ExhibitionDetail';
 import { WorkDetail } from './components/Public/WorkDetail';
@@ -94,6 +92,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white">
+        <SeoManager exhibitions={exhibitions} works={works} />
         <Navigation />
         <main className="flex-grow pb-24">
           <Routes>
@@ -110,6 +109,7 @@ export default function App() {
                 exhibitions={exhibitions} setExhibitions={setExhibitions}
                 works={works} setWorks={setWorks}
                 about={about} setAbout={setAbout}
+                contact={contact} setContact={setContact}
               />
             } />
           </Routes>

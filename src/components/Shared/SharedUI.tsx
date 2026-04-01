@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MediaItem } from '../../types';
 
+const PREVIEW_TIME = 0.1;
+
 export const MetadataLabel = ({ label, value }: { label: string, value: string }) => (
   <div className="flex flex-col mb-2">
     <span className="text-[10px] uppercase font-bold text-gray-400 leading-none mb-1">{label}</span>
@@ -55,6 +57,14 @@ export const MediaPreview = ({ item, isHovered, objectFit = 'cover' }: { item?: 
   const [error, setError] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
+  const getPreviewTime = (duration?: number) => {
+    if (!Number.isFinite(duration)) {
+      return PREVIEW_TIME;
+    }
+
+    return Math.min(PREVIEW_TIME, Math.max(0, (duration ?? 0) - 0.1));
+  };
+
   useEffect(() => {
     setError(false);
     setIsReady(false);
@@ -71,7 +81,7 @@ export const MediaPreview = ({ item, isHovered, objectFit = 'cover' }: { item?: 
         }
       } else {
         video.pause();
-        video.currentTime = PREVIEW_TIME; 
+        video.currentTime = getPreviewTime(video.duration);
       }
     }
   }, [isHovered, item?.type]);
@@ -87,7 +97,7 @@ export const MediaPreview = ({ item, isHovered, objectFit = 'cover' }: { item?: 
   const handleLoadedMetadata = () => {
     const video = videoRef.current;
     if (video) {
-      video.currentTime = PREVIEW_TIME;
+      video.currentTime = getPreviewTime(video.duration);
     }
   };
 

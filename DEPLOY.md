@@ -1,22 +1,21 @@
 # Deployment Guide
 
-This document describes the process of setting up and deploying the site on a cPanel hosting environment.
+This project targets cPanel/Apache hosting with the repository cloned outside `public_html` and deployed via `.cpanel.yml`.
 
-**IMPORTANT: Because cPanel shared hosting environments vary, the most reliable method is to build the site locally and push the `dist` folder to GitHub.**
+## Deployment Model
 
-## Part 1: Automated Deployment Workflow
-
-This project has a **GitHub Action** named `cpanel-deploy.yml` configured. 
-Every time you push a change to the `main` branch, GitHub will automatically:
+The GitHub Action in `.github/workflows/cpanel-deploy.yml` currently:
 1. Build the project using Node.js/Vite.
-2. Put all production files in the `dist` folder.
-3. Push those files directly back into the **`main`** branch.
+2. Copy PHP backend files into `dist/api/`.
+3. Commit the built `dist/` output back into `main`.
 
-This means you **never need to build locally** to deploy.
+After cPanel pulls the latest repository state and runs `.cpanel.yml`, deployment:
+- wipes old files from `public_html` except `.well-known`
+- copies the current `dist/` output into `public_html`
+- copies `private/config.php` into `/home/kovachpa/private/`
+- copies `private/content.json` only if it does not already exist there
 
----
-
-## Part 2: cPanel Configuration
+## cPanel Setup
 
 To connect this automated workflow to your cPanel hosting:
 
@@ -30,8 +29,12 @@ To connect this automated workflow to your cPanel hosting:
 
 ### Step 2: Deploy to public_html
 1. Go to the **Pull or Deploy** tab.
-2. Click **Update from Remote**. 
-   *(Note: wait a 1-2 хвилин after you push code to GitHub for the Action to build the `dist` folder before clicking Update)*
+2. Click **Update from Remote** after the GitHub Action finishes rebuilding `dist/`.
 3. Click **Deploy HEAD Commit**.
 
-The `.cpanel.yml` file is configured to copy everything from the `dist` folder into your `public_html` folder. Your site will instantly go live!
+## Important Production Notes
+
+- `private/config.php` must contain a real password hash before admin login will work.
+- `private/content.json` is preserved on repeated deploys so live edits are not overwritten.
+- Because `.cpanel.yml` now clears `public_html`, do not keep unrelated files there unless they are inside `.well-known`.
+- The GitHub Action now prefers `npm ci` automatically whenever `package-lock.json` exists; on the first run without a lockfile it falls back to `npm install` and commits the generated lockfile.

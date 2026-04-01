@@ -31,6 +31,20 @@ export const ContactPage = ({ data }: { data: ContactData }) => (
             {data.whatsapp}
           </a>
         </div>
+
+        {data.facebook && (
+          <div className="flex flex-col gap-1">
+            <span className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Facebook</span>
+            <a
+              href={data.facebook.startsWith('http') ? data.facebook : `https://facebook.com/${data.facebook}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-base md:text-lg font-medium hover:text-[#b20000] transition-colors duration-300"
+            >
+              {data.facebook}
+            </a>
+          </div>
+        )}
       </div>
       
       <div className="mt-16 pt-8 border-t border-gray-100 flex justify-end items-end">

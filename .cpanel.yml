@@ -4,6 +4,7 @@ deployment:
     - export DEPLOYPATH=/home/kovachpa/public_html/
     - export PRIVATEPATH=/home/kovachpa/private/
     - /bin/mkdir -p $PRIVATEPATH
+    - /bin/find $DEPLOYPATH -mindepth 1 -maxdepth 1 ! -name '.well-known' ! -name 'uploads' -exec /bin/rm -rf {} +
     - /bin/cp -R dist/. $DEPLOYPATH
     - /bin/cp -p private/config.php $PRIVATEPATH
     - /bin/cp -n private/content.json $PRIVATEPATH || true

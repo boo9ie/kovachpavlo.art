@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NewsItem, ExhibitionItem, WorkItem, AboutData } from '../../types';
+import { NewsItem, ExhibitionItem, WorkItem, AboutData, ContactData } from '../../types';
 import { API_SAVE_URL, API_UPLOAD_URL, API_LOGIN_URL, API_LOGOUT_URL, API_AUTH_STATUS_URL, apiPost, apiGet } from '../../utils/api';
 import { FormLabel, AdminInput, AdminTextarea } from '../Shared/SharedUI';
 
@@ -7,16 +7,13 @@ export const AdminPanel = ({
   news, setNews, 
   exhibitions, setExhibitions, 
   works, setWorks,
-  about, setAbout
+  about, setAbout,
+  contact, setContact
 }: any) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
   const [loginInput, setLoginInput] = useState('');
-  
-  // Persistent Security State
-  const [failedAttempts, setFailedAttempts] = useState(() => Number(localStorage.getItem('failed_attempts') || 0));
-  const [lockoutUntil, setLockoutUntil] = useState(() => Number(localStorage.getItem('lockout_until') || 0));
-  const [lockoutTimeLeft, setLockoutTimeLeft] = useState(0);
+  const [loginError, setLoginError] = useState('');
   
   const [activeTab, setActiveTab] = useState('news');
   const [showForm, setShowForm] = useState(false);
@@ -29,38 +26,30 @@ export const AdminPanel = ({
   const [newExhib, setNewExhib] = useState<Partial<ExhibitionItem>>({ photos: [] });
   const [newWork, setNewWork] = useState<Partial<WorkItem>>({ media: [] });
   const [editAbout, setEditAbout] = useState<AboutData>(about);
+  const [editContact, setEditContact] = useState<ContactData>(contact);
   
   // Local states for exhibition list management
   const [newSoloExhib, setNewSoloExhib] = useState('');
   const [newGroupExhib, setNewGroupExhib] = useState('');
 
   useEffect(() => {
-    let timer: any;
-    const updateLockout = () => {
-      const now = Date.now();
-      const remaining = Math.max(0, Math.ceil((lockoutUntil - now) / 1000));
-      setLockoutTimeLeft(remaining);
-      if (remaining === 0 && lockoutUntil !== 0) {
-        setLockoutUntil(0);
-        localStorage.removeItem('lockout_until');
-      }
-    };
-
-    updateLockout();
-    timer = setInterval(updateLockout, 1000);
-
     // Check server session
     apiGet(API_AUTH_STATUS_URL).then((res: any) => {
       setIsAuthenticated(res?.authenticated === true);
       setAuthChecking(false);
     });
+  }, []);
 
-    return () => clearInterval(timer);
-  }, [lockoutUntil]);
+  useEffect(() => {
+    setEditAbout(about);
+  }, [about]);
+
+  useEffect(() => {
+    setEditContact(contact);
+  }, [contact]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (lockoutTimeLeft > 0) return;
 
     try {
       const response = await fetch(API_LOGIN_URL, {
@@ -73,28 +62,15 @@ export const AdminPanel = ({
       
       if (res.success) {
         setIsAuthenticated(true);
-        setFailedAttempts(0);
-        localStorage.removeItem('failed_attempts');
+        setLoginError('');
         setLoginInput('');
       } else {
-        throw new Error('Invalid password');
+        throw new Error(res.error || 'Invalid password');
       }
     } catch (err) {
-      const nextAttempts = failedAttempts + 1;
-      setFailedAttempts(nextAttempts);
-      localStorage.setItem('failed_attempts', nextAttempts.toString());
+      const message = err instanceof Error ? err.message : 'Unable to log in';
+      setLoginError(message);
       setLoginInput('');
-
-      if (nextAttempts >= 3) {
-        const until = Date.now() + 30000;
-        setLockoutUntil(until);
-        localStorage.setItem('lockout_until', until.toString());
-        setFailedAttempts(0);
-        localStorage.removeItem('failed_attempts');
-        alert("Too many failed attempts. Access locked for 30 seconds.");
-      } else {
-        alert(`Invalid password. ${3 - nextAttempts} attempts remaining.`);
-      }
     }
   };
 
@@ -315,25 +291,23 @@ export const AdminPanel = ({
           <h2 className="text-2xl font-black uppercase tracking-tighter text-center text-black">Admin Access</h2>
           <div className="space-y-4">
             <FormLabel required>Password</FormLabel>
-            <input 
+              <input
               type="password" 
               value={loginInput} 
-              disabled={lockoutTimeLeft > 0}
               onChange={e => setLoginInput(e.target.value)}
-              className={`w-full p-4 border-2 border-black bg-white text-black outline-none font-bold placeholder:text-gray-300 transition-opacity ${lockoutTimeLeft > 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-100'}`}
+              className="w-full p-4 border-2 border-black bg-white text-black outline-none font-bold placeholder:text-gray-300 transition-opacity"
               placeholder="••••••••"
               autoFocus
             />
           </div>
           <button 
             type="submit" 
-            disabled={lockoutTimeLeft > 0}
-            className={`w-full text-white p-4 font-black uppercase tracking-widest transition-colors ${lockoutTimeLeft > 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-black hover:bg-[#b20000]'}`}
+            className="w-full text-white p-4 font-black uppercase tracking-widest transition-colors bg-black hover:bg-[#b20000]"
           >
-            {lockoutTimeLeft > 0 ? `LOCKED: ${lockoutTimeLeft}s` : 'ENTER'}
+            ENTER
           </button>
           <div className="flex flex-col items-center gap-2">
-            {failedAttempts > 0 && <p className="text-[10px] text-[#b20000] font-bold uppercase">Attempts: {failedAttempts}/3</p>}
+            {loginError && <p className="text-[10px] text-[#b20000] font-bold uppercase text-center">{loginError}</p>}
           </div>
         </form>
       </div>
@@ -344,7 +318,7 @@ export const AdminPanel = ({
     <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-8">
       <div className="flex flex-col md:flex-row justify-between items-baseline border-b border-black mb-4 mt-12">
         <div className="flex gap-4 overflow-x-auto pb-4 uppercase text-[10px] font-bold">
-          {['news', 'exhibitions', 'works', 'about'].map(tab => (
+          {['news', 'exhibitions', 'works', 'about', 'contact'].map(tab => (
             <button key={tab} type="button" onClick={() => { setActiveTab(tab); resetForms(); }} className={`px-6 py-3 border border-black transition-all ${activeTab === tab ? 'bg-black text-white' : 'bg-white hover:bg-gray-100'}`}>{tab}</button>
           ))}
         </div>
@@ -616,9 +590,64 @@ export const AdminPanel = ({
                     </div>
                  </div>
 
-                 <button type="button" onClick={() => setAbout(editAbout)} className="w-full py-4 bg-black text-white font-bold uppercase text-xs tracking-widest hover:bg-[#b20000] transition-colors">Commit Data</button>
+                 <button
+                   type="button"
+                   onClick={() => {
+                     setAbout(editAbout);
+                   }}
+                   className="w-full py-4 bg-black text-white font-bold uppercase text-xs tracking-widest hover:bg-[#b20000] transition-colors"
+                 >
+                   Commit About Data
+                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'contact' && (
+          <div className="space-y-8 bg-white p-8 border border-black max-w-3xl">
+            <div className="space-y-2">
+              <h3 className="font-bold uppercase text-sm border-b-2 border-black pb-2">Public Contact Details</h3>
+              <p className="text-xs text-gray-500">These fields are saved into `private/content.json` and rendered on the public contact page.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <FormLabel required>Email</FormLabel>
+                <AdminInput
+                  type="email"
+                  value={editContact.email}
+                  onChange={e => setEditContact({ ...editContact, email: e.target.value })}
+                  placeholder="name@example.com"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <FormLabel required>WhatsApp / Phone</FormLabel>
+                <AdminInput
+                  value={editContact.whatsapp}
+                  onChange={e => setEditContact({ ...editContact, whatsapp: e.target.value })}
+                  placeholder="+380..."
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <FormLabel>Facebook Username or URL</FormLabel>
+                <AdminInput
+                  value={editContact.facebook}
+                  onChange={e => setEditContact({ ...editContact, facebook: e.target.value })}
+                  placeholder="pavlo.kovach or https://facebook.com/pavlo.kovach"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setContact(editContact)}
+              className="w-full py-4 bg-black text-white font-bold uppercase text-xs tracking-widest hover:bg-[#b20000] transition-colors"
+            >
+              Commit Contact Data
+            </button>
           </div>
         )}
 

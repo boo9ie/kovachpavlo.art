@@ -2,19 +2,41 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# PAVLOKOVACH.ART
 
-This contains everything you need to run your app locally.
+Portfolio site for Pavlo Kovach built with React + Vite and deployed to cPanel/Apache as a SPA with PHP session-based admin endpoints.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1eLyXbbybWeaQJ9UE_tTDJ2TtUl5MkgOX
+## Stack
 
-## Run Locally
+- Frontend: React 18, React Router, Vite, Tailwind CSS
+- Backend endpoints: PHP in `public/api/`
+- Private server-side storage: `private/content.json`, `private/config.php`
+- Hosting target: cPanel/Apache with `.htaccess` SPA rewrites
 
-**Prerequisites:**  Node.js
+## Local Development
 
+Prerequisite: Node.js 18+.
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Start the dev server:
    `npm run dev`
+3. Build production assets:
+   `npm run build`
+
+## Admin Authentication
+
+- Admin login is handled by PHP sessions, not client-side hashing.
+- Set `ADMIN_PASSWORD_HASH` in `private/config.php` before using `/admin` in production.
+- Generate a hash with PHP:
+  `php -r "echo password_hash('your-new-password', PASSWORD_DEFAULT), PHP_EOL;"`
+
+## Content Storage
+
+- Public content is served through `public/api/content.php`.
+- Editable data is stored in `private/content.json` outside `public_html` on the server.
+- Uploads are stored in `/uploads/` with randomized file names.
+
+## Deployment
+
+See `DEPLOY.md` for the cPanel/GitHub Actions workflow.
