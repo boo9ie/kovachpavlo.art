@@ -1,5 +1,18 @@
+# Disable directory browsing
+Options -Indexes
+
 # Prioritize our React App over legacy WordPress files
-DirectoryIndex index.html index.php
+DirectoryIndex index.html
+
+# Enable BrowserRouter (SPA) Fallback
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
 
 # Enable Gzip Compression
 <IfModule mod_deflate.c>
@@ -25,7 +38,6 @@ DirectoryIndex index.html index.php
   Header set X-Content-Type-Options "nosniff"
   Header set X-Frame-Options "SAMEORIGIN"
   Header set X-XSS-Protection "1; mode=block"
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self' data: https:; connect-src 'self';"
 </IfModule>
-
-# Disable directory browsing
-Options -Indexes
