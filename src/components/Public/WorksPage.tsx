@@ -26,7 +26,7 @@ export const WorksPage = ({ items }: { items: WorkItem[] }) => {
             </div>
             <div className="border-t border-black pt-4">
                <div className="flex justify-between items-start">
-                 <h3 className="text-xl font-bold uppercase leading-tight group-hover:text-[#b20000] transition-colors">{item.title}</h3>
+                 <h3 className="text-xl font-bold leading-tight group-hover:text-[#b20000] transition-colors">{item.title}</h3>
                  <span className="text-xs font-bold text-black">{formatDate(item.date)}</span>
                </div>
                <ExpandableText 

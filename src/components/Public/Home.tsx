@@ -29,7 +29,7 @@ export const Home = ({ items }: { items: ExhibitionItem[] }) => {
                 </div>
               </div>
               <Link to={`/exhibition/${item.id}`} className="group inline-block">
-                <h2 className="text-4xl md:text-5xl font-bold uppercase mb-4 leading-none tracking-normal group-hover:text-[#b20000] transition-colors">
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-none tracking-normal group-hover:text-[#b20000] transition-colors">
                   {item.title}
                 </h2>
               </Link>

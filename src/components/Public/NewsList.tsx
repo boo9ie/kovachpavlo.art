@@ -17,7 +17,7 @@ export const NewsList = ({ items }: { items: NewsItem[] }) => (
             </div>
             <div className="w-full md:w-2/3 border-t border-black pt-4">
               <div className="text-[10px] uppercase font-bold text-black mb-2">/ {formatDate(item.date)}</div>
-              <h2 className="text-3xl font-bold uppercase group-hover:underline underline-offset-8">{item.title}</h2>
+              <h2 className="text-3xl font-bold group-hover:underline underline-offset-8">{item.title}</h2>
               <div className="mt-4 text-[11px] uppercase tracking-widest text-gray-500">External Link &#x2192;</div>
             </div>
           </div>
