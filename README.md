@@ -16,7 +16,9 @@ Portfolio site for Pavlo Kovach built with React + Vite and deployed to cPanel/A
 
 ## Local Development
 
-Prerequisite: Node.js 18+.
+Prerequisites:
+- Node.js 18+
+- PHP 8+ for checking the API scripts or generating the admin password hash
 
 1. Install dependencies:
    `npm ci`
@@ -25,14 +27,33 @@ Prerequisite: Node.js 18+.
 3. Build production assets:
    `npm run build`
 
+Notes:
+- `npm run dev` covers the React frontend.
+- Admin login, save, upload, and logout are PHP endpoints under `public/api/`. To test the full admin flow locally you need a PHP-capable host or staging environment that serves those endpoints.
+- If the PHP API is unavailable during frontend development, the site falls back to the bundled initial content.
+
+## Build Output
+
+`npm run build` writes the frontend bundle to `dist/`.
+
+The release flow expects `dist/` to contain:
+- `index.html`
+- `assets/`
+- `.htaccess`
+- `robots.txt`
+- `sitemap.xml`
+
+GitHub Actions also copies the PHP API files into `dist/api/` before the cPanel deploy step.
+
 ## Admin Authentication
 
 - Admin login is handled by PHP sessions, not client-side hashing.
 - The repository keeps only `private/config.example.php`. Do not commit a real `private/config.php`.
 - Generate a password hash with:
   `php scripts/generate-password-hash.php "your-strong-password"`
-- Create `private/config.php` on the server from the example and paste the generated hash.
+- Create `/home/USERNAME/private/config.php` on the server from the example and paste the generated hash.
 - If `private/config.php` is missing or empty, `/api/login.php` returns `500` with `Admin password hash is not configured`.
+- Logout is POST-only and destroys the PHP session cookie.
 
 ## Content Storage
 
@@ -40,9 +61,37 @@ Prerequisite: Node.js 18+.
 - Editable data is stored in `private/content.json` outside `public_html` on the server.
 - Uploads are stored in `/uploads/` with randomized file names.
 
+## First-Time Production Config
+
+1. Generate the hash:
+   `php scripts/generate-password-hash.php "MyStrongPassword"`
+2. Create `/home/USERNAME/private/config.php` with this content:
+
+```php
+<?php
+define('ADMIN_PASSWORD_HASH', 'paste-generated-hash-here');
+```
+
+3. If shell access is available, set restrictive permissions:
+   `chmod 640 /home/USERNAME/private/config.php`
+4. Never commit this file to git.
+
 ## Deployment
 
-See `DEPLOY.md` for the cPanel/GitHub Actions workflow.
+See `DEPLOY.md` for the complete cPanel/GitHub Actions workflow.
+
+Short version:
+- Push to `main`
+- Let GitHub Actions run `npm ci`, `npm run build`, and `php -l`
+- In cPanel Git Version Control, run `Update from Remote`
+- Run `Deploy HEAD Commit`
+- Walk through `RELEASE_CHECKLIST.md`
+
+The deploy process preserves:
+- `public_html/uploads`
+- `public_html/.well-known`
+- `/home/USERNAME/private/config.php`
+- `/home/USERNAME/private/content.json`
 
 ## What Not To Commit
 

@@ -1,16 +1,17 @@
 <?php
-session_start();
-header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/_session.php';
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    json_response(['error' => 'Method not allowed'], 405);
+}
+
+bootstrap_session();
 
 $_SESSION = [];
 
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-    );
+if (session_status() === PHP_SESSION_ACTIVE) {
+    clear_session_cookie();
+    session_destroy();
 }
 
-session_destroy();
-echo json_encode(['success' => true]);
+json_response(['success' => true]);

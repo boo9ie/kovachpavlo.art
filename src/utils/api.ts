@@ -6,34 +6,34 @@ export const API_LOGOUT_URL = '/api/logout.php';
 export const API_AUTH_STATUS_URL = '/api/auth-status.php';
 
 export const apiPost = async (url: string, payload: any) => {
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload)
-    });
-    if (response.status === 401) {
-      throw new Error('Unauthorized');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.error || (response.status === 401 ? 'Unauthorized' : 'Request failed'));
   }
+
+  return data;
 };
 
 export const apiGet = async (url: string) => {
   try {
-    const response = await fetch(`${url}?t=${Date.now()}`); // Cache busting
+    const response = await fetch(`${url}?t=${Date.now()}`, {
+      credentials: 'include'
+    });
     if (!response.ok) return null;
     try {
       return await response.json();
     } catch {
       return null;
     }
-  } catch (error) {
-    console.warn('API Load Error:', error);
+  } catch {
     return null;
   }
 };

@@ -1,9 +1,10 @@
 <?php
-session_start();
-header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/_session.php';
 
-if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
-    echo json_encode(['authenticated' => true]);
-} else {
-    echo json_encode(['authenticated' => false]);
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    json_response(['error' => 'Method not allowed'], 405);
 }
+
+bootstrap_session();
+
+json_response(['authenticated' => (($_SESSION['authenticated'] ?? false) === true)]);

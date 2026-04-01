@@ -11,6 +11,8 @@ if ($argc < 2 || trim($argv[1]) === '') {
 }
 
 $password = $argv[1];
+
+// Prefer Argon2id when available and fall back to bcrypt on older PHP builds.
 $algorithm = defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT;
 $options = $algorithm === PASSWORD_ARGON2ID
     ? ['memory_cost' => 65536, 'time_cost' => 4, 'threads' => 2]

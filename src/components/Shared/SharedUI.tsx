@@ -142,8 +142,7 @@ export const MediaPreview = ({ item, isHovered, objectFit = 'cover' }: { item?: 
           preload="metadata"
           onLoadedMetadata={handleLoadedMetadata}
           onSeeked={handleSeeked}
-          onError={(e) => {
-            console.error("Video load error for", item.url, e);
+          onError={() => {
             setError(true);
           }}
           className={`w-full h-full object-${objectFit} transition-opacity duration-1000 ease-in-out ${filterClass} ${isReady ? 'opacity-100' : 'opacity-0'}`}

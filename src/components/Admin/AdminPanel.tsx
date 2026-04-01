@@ -87,6 +87,8 @@ export const AdminPanel = ({
   const handleLogout = async () => {
     await fetch(API_LOGOUT_URL, { method: 'POST', credentials: 'include' });
     setIsAuthenticated(false);
+    setLoginError('');
+    setLoginInput('');
   };
 
   const handleClearStorage = async (e: React.MouseEvent) => {
@@ -214,7 +216,6 @@ export const AdminPanel = ({
              alert(`Failed to upload ${file.name}`);
           }
         } catch (err: any) {
-          console.error("Upload error:", err);
           if (err.message === 'Unauthorized' || err.message.includes('401')) {
             alert("Сесія завершилася. Будь ласка, увійдіть знову.");
             handleLogout();

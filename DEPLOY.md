@@ -21,6 +21,8 @@ After cPanel pulls the latest repository state and runs `.cpanel.yml`, deploymen
 
 This prevents deploys from overwriting the real production password hash or wiping live uploaded media.
 
+`.cpanel.yml` must stay in the repository root for cPanel to execute it.
+
 ## cPanel Setup
 
 To connect this automated workflow to your cPanel hosting:
@@ -38,13 +40,27 @@ To connect this automated workflow to your cPanel hosting:
 2. Click **Update from Remote** after the GitHub Action finishes rebuilding `dist/`.
 3. Click **Deploy HEAD Commit**.
 
+The deploy cleanup keeps only:
+- `public_html/.well-known`
+- `public_html/uploads`
+
+Everything else in `public_html` is replaced by the current release, which is what removes old WordPress files, stale bundles, and mixed legacy output.
+
 ## First-Time Production Setup
 
 1. Run:
    `php scripts/generate-password-hash.php "your-strong-password"`
-2. On the server, open `/home/kovachpa/private/config.php`.
-3. Replace the empty `ADMIN_PASSWORD_HASH` value with the generated hash.
-4. Save the file.
+2. On the server, create `/home/kovachpa/private/config.php` with:
+
+```php
+<?php
+define('ADMIN_PASSWORD_HASH', 'paste-generated-hash-here');
+```
+
+3. Save the file outside `public_html`.
+4. If shell access is available, set:
+   `chmod 640 /home/kovachpa/private/config.php`
+5. Do not commit this file back into git.
 
 ## Safe Redeploy Rules
 
@@ -54,6 +70,28 @@ To connect this automated workflow to your cPanel hosting:
 - Because `.cpanel.yml` clears `public_html`, do not keep unrelated files there unless they are inside `.well-known` or `uploads`.
 - Legacy WordPress folders such as `wp-admin`, `wp-content`, `wp-includes`, and stale bundles are removed by the deploy cleanup step.
 
-## Optional Legacy Handling
+## Post-Deploy Verification
 
-If Search Console keeps requesting old WordPress URLs after cleanup, add targeted `410 Gone` or redirect rules in `.htaccess` as a separate follow-up. The deploy process itself now removes old WordPress files from `public_html`.
+After `Deploy HEAD Commit`, check:
+- `/`
+- `/works`
+- `/about`
+- `/exhibitions`
+- `/publications`
+- `/contact`
+- `/robots.txt`
+- `/sitemap.xml`
+- `/admin`
+
+Then verify:
+- admin login works with the configured password hash
+- save updates persist after reload
+- image upload works
+- video upload works
+- `wp-admin`, `wp-content`, and `wp-includes` no longer resolve as live legacy content
+
+For the full pass/fail checklist, use `RELEASE_CHECKLIST.md`.
+
+## Legacy Cleanup Note
+
+After the final deploy, confirm that old WordPress URLs no longer return the previous site. If Google Search Console still shows stale URLs or snippets, request reindexing or add narrow 404/410 cleanup rules as a follow-up. The deploy flow itself already removes the old public files from `public_html`.

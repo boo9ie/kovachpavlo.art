@@ -54,8 +54,12 @@ export default function App() {
           setAbout(INITIAL_ABOUT);
           setContact(INITIAL_CONTACT);
         }
-      } catch (err) {
-        console.error("Data loading error:", err);
+      } catch {
+        setNews(INITIAL_NEWS);
+        setExhibitions(INITIAL_EXHIBITIONS);
+        setWorks(INITIAL_WORKS);
+        setAbout(INITIAL_ABOUT);
+        setContact(INITIAL_CONTACT);
       } finally {
         setIsLoaded(true);
       }
