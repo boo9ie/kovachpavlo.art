@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { NewsItem, ExhibitionItem, WorkItem, AboutData } from '../../types';
-import { hashPassword } from '../../utils/auth';
-import { API_SAVE_URL, API_UPLOAD_URL, apiPost } from '../../utils/api';
+import { API_SAVE_URL, API_UPLOAD_URL, API_LOGIN_URL, API_LOGOUT_URL, API_AUTH_STATUS_URL, apiPost, apiGet } from '../../utils/api';
 import { FormLabel, AdminInput, AdminTextarea } from '../Shared/SharedUI';
 
 export const AdminPanel = ({ 
   news, setNews, 
   exhibitions, setExhibitions, 
   works, setWorks,
-  about, setAbout,
-  passwordHash, setPasswordHash
+  about, setAbout
 }: any) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(sessionStorage.getItem('admin_auth') === 'true');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
   const [loginInput, setLoginInput] = useState('');
   
   // Persistent Security State
@@ -24,8 +23,6 @@ export const AdminPanel = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [diskSpace, setDiskSpace] = useState<any>(null);
-  const [newPassword, setNewPassword] = useState('');
   
   // Form States
   const [newNews, setNewNews] = useState<Partial<NewsItem>>({});
@@ -52,10 +49,11 @@ export const AdminPanel = ({
     updateLockout();
     timer = setInterval(updateLockout, 1000);
 
-    fetch('/api/sysinfo.php')
-      .then(res => res.json())
-      .then(data => setDiskSpace(data))
-      .catch(console.error);
+    // Check server session
+    apiGet(API_AUTH_STATUS_URL).then((res: any) => {
+      setIsAuthenticated(res?.authenticated === true);
+      setAuthChecking(false);
+    });
 
     return () => clearInterval(timer);
   }, [lockoutUntil]);
@@ -65,7 +63,7 @@ export const AdminPanel = ({
     if (lockoutTimeLeft > 0) return;
 
     try {
-      const response = await fetch('/api/login.php', {
+      const response = await fetch(API_LOGIN_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -75,7 +73,6 @@ export const AdminPanel = ({
       
       if (res.success) {
         setIsAuthenticated(true);
-        sessionStorage.setItem('admin_auth', 'true');
         setFailedAttempts(0);
         localStorage.removeItem('failed_attempts');
         setLoginInput('');
@@ -111,17 +108,21 @@ export const AdminPanel = ({
     setUploadProgress(0);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await fetch(API_LOGOUT_URL, { method: 'POST', credentials: 'include' });
     setIsAuthenticated(false);
-    sessionStorage.removeItem('admin_auth');
   };
 
   const handleClearStorage = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (window.confirm("This action will DELETE ALL ARCHIVE DATA. Are you sure?")) {
-      await apiPost(API_SAVE_URL, {});
-      localStorage.clear();
-      sessionStorage.clear();
+      await apiPost(API_SAVE_URL, {
+        news: [],
+        exhibitions: [],
+        works: [],
+        about: { photo: '', text: '', birthDate: '', soloExhibitions: [], groupExhibitions: [] },
+        contact: { email: '', facebook: '', whatsapp: '' }
+      });
       window.location.reload();
     }
   };
@@ -173,7 +174,7 @@ export const AdminPanel = ({
     const files = e.target.files;
     if (files) {
       setIsUploading(true);
-      const fileList = Array.from(files);
+      const fileList = Array.from(files) as File[];
       let processed = 0;
 
       for (const file of fileList) {
@@ -225,13 +226,13 @@ export const AdminPanel = ({
             const type = file.type.startsWith('video') ? 'video' : 'image';
             
             if (target === 'exhib') {
-              setNewExhib(prev => ({ ...prev, photos: [...(prev.photos || []), { url, type, photographer: '' }] }));
+              setNewExhib((prev: any) => ({ ...prev, photos: [...(prev.photos || []), { url, type, photographer: '' }] }));
             } else if (target === 'work') {
-              setNewWork(prev => ({ ...prev, media: [...(prev.media || []), { url, type, photographer: '' }] }));
+              setNewWork((prev: any) => ({ ...prev, media: [...(prev.media || []), { url, type, photographer: '' }] }));
             } else if (target === 'news') {
-              setNewNews(prev => ({ ...prev, photo: url }));
+              setNewNews((prev: any) => ({ ...prev, photo: url }));
             } else if (target === 'about') {
-              setEditAbout(prev => ({ ...prev, photo: url }));
+              setEditAbout((prev: any) => ({ ...prev, photo: url }));
             }
           } else {
              alert(`Failed to upload ${file.name}`);
@@ -303,6 +304,10 @@ export const AdminPanel = ({
     setEditAbout({ ...editAbout, groupExhibitions: editAbout.groupExhibitions.filter((_, i) => i !== idx) });
   };
 
+  if (authChecking) {
+    return <div className="min-h-screen bg-white flex items-center justify-center uppercase font-bold text-[10px] tracking-widest text-black">Verifying Access...</div>;
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-8">
@@ -339,16 +344,11 @@ export const AdminPanel = ({
     <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-8">
       <div className="flex flex-col md:flex-row justify-between items-baseline border-b border-black mb-4 mt-12">
         <div className="flex gap-4 overflow-x-auto pb-4 uppercase text-[10px] font-bold">
-          {['news', 'exhibitions', 'works', 'about', 'settings'].map(tab => (
+          {['news', 'exhibitions', 'works', 'about'].map(tab => (
             <button key={tab} type="button" onClick={() => { setActiveTab(tab); resetForms(); }} className={`px-6 py-3 border border-black transition-all ${activeTab === tab ? 'bg-black text-white' : 'bg-white hover:bg-gray-100'}`}>{tab}</button>
           ))}
         </div>
         <div className="pb-4 text-[9px] font-bold uppercase flex items-center gap-6">
-          {diskSpace && (
-            <div className="text-gray-500 border-r border-gray-300 pr-4">
-              Storage <span className="text-black">{diskSpace.percent_used}%</span> ({diskSpace.used_formatted} / {diskSpace.total_formatted} Free: {diskSpace.free_formatted})
-            </div>
-          )}
           <button type="button" onClick={handleLogout} className="text-gray-500 hover:text-black">Logout Session</button>
           <button type="button" onClick={handleClearStorage} className="text-[#b20000] underline decoration-dotted underline-offset-4">Reset Archive</button>
         </div>
@@ -622,47 +622,7 @@ export const AdminPanel = ({
           </div>
         )}
 
-        {activeTab === 'settings' && (
-          <div className="max-w-md mx-auto space-y-12 py-12">
-            <div className="space-y-6 border-b border-black pb-12">
-              <h3 className="font-black uppercase text-sm tracking-widest">Security: Admin Password</h3>
-              <div className="space-y-4">
-                <FormLabel>New Password</FormLabel>
-                <input 
-                  type="password" 
-                  value={newPassword} 
-                  onChange={e => setNewPassword(e.target.value)}
-                  className="w-full p-4 border-2 border-black bg-white text-black font-bold outline-none"
-                  placeholder="Enter new password"
-                />
-                <button 
-                  type="button"
-                  onClick={async () => {
-                    if(newPassword.length < 4) return alert("Password too short (min 4 chars)");
-                    const hash = await hashPassword(newPassword);
-                    setPasswordHash(hash);
-                    setNewPassword('');
-                    alert("Password hashed and updated successfully");
-                  }}
-                  className="w-full py-4 bg-black text-white font-black uppercase text-xs tracking-widest hover:bg-[#b20000]"
-                >
-                  Update & Hash Password
-                </button>
-              </div>
-            </div>
 
-            <div className="space-y-4">
-              <h3 className="font-black uppercase text-sm tracking-widest">Current Session</h3>
-              <button 
-                type="button"
-                onClick={handleLogout}
-                className="w-full py-4 border-2 border-black bg-white text-black font-black uppercase text-xs tracking-widest hover:bg-black hover:text-white transition-all"
-              >
-                Logout Now
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

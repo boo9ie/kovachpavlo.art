@@ -1,18 +1,15 @@
 <?php
-session_set_cookie_params(["lifetime" => 86400, "path" => "/", "samesite" => "Lax"]);
 session_start();
-$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*';
-if ($origin !== '*') {
-    header("Access-Control-Allow-Origin: $origin");
-} else {
-    header("Access-Control-Allow-Origin: *");
-}
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Access-Control-Allow-Credentials: true');
+header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
+    exit;
+}
+
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
     exit;
 }
 
@@ -26,29 +23,23 @@ if (!$data) {
     exit;
 }
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
+$file = __DIR__ . '/../../private/content.json';
+// Atomically save using temp file and rename to avoid corruption during concurrent saves
+$tempFile = $file . '.' . uniqid() . '.tmp';
 
-$file = 'data.json';
-$fp = @fopen($file, 'c');
-if ($fp) {
-    if (flock($fp, LOCK_EX)) {
-        ftruncate($fp, 0);
-        fwrite($fp, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        fflush($fp);
-        flock($fp, LOCK_UN);
+// write to temp file
+if (file_put_contents($tempFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false) {
+    // rename is atomic on POSIX
+    if (rename($tempFile, $file)) {
         echo json_encode(['success' => true]);
     } else {
-        error_log("Save Error: Could not acquire lock on data.json.");
+        unlink($tempFile);
+        error_log("Save Error: Failed to rename temp file to content.json.");
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to lock file']);
+        echo json_encode(['error' => 'Failed to save file']);
     }
-    fclose($fp);
 } else {
-    error_log("Save Error: Failed to open data.json for writing.");
+    error_log("Save Error: Failed to write to temp file.");
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to open file']);
+    echo json_encode(['error' => 'Failed to write file']);
 }

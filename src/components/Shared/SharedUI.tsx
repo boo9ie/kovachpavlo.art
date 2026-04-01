@@ -60,19 +60,9 @@ export const MediaPreview = ({ item, isHovered, objectFit = 'cover' }: { item?: 
     setIsReady(false);
   }, [item?.url]);
 
-  const PREVIEW_TIME = 0.7;
-
-  if (!item) {
-    return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-[10px] uppercase font-bold text-gray-400 border border-gray-200">
-        No Media
-      </div>
-    );
-  }
-
   useEffect(() => {
     const video = videoRef.current;
-    if (item.type === 'video' && video) {
+    if (item?.type === 'video' && video) {
       if (isHovered) {
         video.currentTime = 0;
         const playPromise = video.play();
@@ -84,7 +74,15 @@ export const MediaPreview = ({ item, isHovered, objectFit = 'cover' }: { item?: 
         video.currentTime = PREVIEW_TIME; 
       }
     }
-  }, [isHovered, item.type]);
+  }, [isHovered, item?.type]);
+
+  if (!item) {
+    return (
+      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-[10px] uppercase font-bold text-gray-400 border border-gray-200">
+        No Media
+      </div>
+    );
+  }
 
   const handleLoadedMetadata = () => {
     const video = videoRef.current;

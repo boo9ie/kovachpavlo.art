@@ -1,6 +1,9 @@
-export const API_DATA_URL = '/api/data.json';
+export const API_DATA_URL = '/api/content.php';
 export const API_SAVE_URL = '/api/save.php';
 export const API_UPLOAD_URL = '/api/upload.php';
+export const API_LOGIN_URL = '/api/login.php';
+export const API_LOGOUT_URL = '/api/logout.php';
+export const API_AUTH_STATUS_URL = '/api/auth-status.php';
 
 export const apiPost = async (url: string, payload: any) => {
   try {

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { 
   INITIAL_NEWS, 
   INITIAL_EXHIBITIONS, 
@@ -12,7 +12,6 @@ import {
   NewsItem, ExhibitionItem, WorkItem, AboutData, ContactData 
 } from './types';
 
-import { DEFAULT_PASS_HASH } from './utils/auth';
 import { API_DATA_URL, API_SAVE_URL, apiPost, apiGet } from './utils/api';
 
 import { Navigation, NAV_ITEMS } from './components/Shared/Navigation';
@@ -36,7 +35,7 @@ export default function App() {
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [about, setAbout] = useState<AboutData>(INITIAL_ABOUT);
   const [contact, setContact] = useState<ContactData>(INITIAL_CONTACT);
-  const [passwordHash, setPasswordHash] = useState(DEFAULT_PASS_HASH);
+
 
   // --- INITIAL LOAD & MIGRATION ---
   useEffect(() => {
@@ -44,23 +43,21 @@ export default function App() {
       try {
         const data = await apiGet(API_DATA_URL);
         
-        if (data) {
+        if (data && !data.error) {
           setNews(data.news || INITIAL_NEWS);
           setExhibitions(data.exhibitions || INITIAL_EXHIBITIONS);
           setWorks(data.works || INITIAL_WORKS);
           setAbout(data.about || INITIAL_ABOUT);
           setContact(data.contact || INITIAL_CONTACT);
-          setPasswordHash(data.admin_password_hash || DEFAULT_PASS_HASH);
         } else {
           setNews(INITIAL_NEWS);
           setExhibitions(INITIAL_EXHIBITIONS);
           setWorks(INITIAL_WORKS);
           setAbout(INITIAL_ABOUT);
-          setPasswordHash(DEFAULT_PASS_HASH);
+          setContact(INITIAL_CONTACT);
         }
       } catch (err) {
         console.error("Data loading error:", err);
-        setPasswordHash(DEFAULT_PASS_HASH); 
       } finally {
         setIsLoaded(true);
       }
@@ -84,19 +81,18 @@ export default function App() {
             exhibitions,
             works,
             about,
-            contact,
-            admin_password_hash: passwordHash
+            contact
         };
         await apiPost(API_SAVE_URL, payload);
       } catch (err) {}
     };
     persist();
-  }, [news, exhibitions, works, about, contact, passwordHash, isLoaded]);
+  }, [news, exhibitions, works, about, contact, isLoaded]);
 
   if (!isLoaded) return <div className="min-h-screen bg-white flex items-center justify-center uppercase font-bold text-[10px] tracking-widest text-black">Decrypting Archive...</div>;
 
   return (
-    <HashRouter>
+    <BrowserRouter>
       <div className="min-h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white">
         <Navigation />
         <main className="flex-grow pb-24">
@@ -114,13 +110,12 @@ export default function App() {
                 exhibitions={exhibitions} setExhibitions={setExhibitions}
                 works={works} setWorks={setWorks}
                 about={about} setAbout={setAbout}
-                passwordHash={passwordHash} setPasswordHash={setPasswordHash}
               />
             } />
           </Routes>
         </main>
 
       </div>
-    </HashRouter>
+    </BrowserRouter>
   );
 }
