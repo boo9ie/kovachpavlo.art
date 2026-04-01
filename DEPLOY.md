@@ -22,6 +22,7 @@ After cPanel pulls the latest repository state and runs `.cpanel.yml`, deploymen
 This prevents deploys from overwriting the real production password hash or wiping live uploaded media.
 
 `.cpanel.yml` must stay in the repository root for cPanel to execute it.
+The current `.cpanel.yml` uses absolute paths instead of exported shell variables so cPanel can execute each task deterministically.
 
 The production site uses one canonical host only:
 - `https://pavlokovach.art`
@@ -52,6 +53,30 @@ The deploy cleanup keeps only:
 - `public_html/uploads`
 
 Everything else in `public_html` is replaced by the current release, which is what removes old WordPress files, stale bundles, and mixed legacy output.
+
+### If cPanel says "The system cannot deploy"
+
+That message usually means one of two things:
+- cPanel could not validate `.cpanel.yml`
+- the repository checkout on the server has uncommitted changes
+
+To check the second case in cPanel Terminal or SSH:
+
+```bash
+cd /home/kovachpa/repositories/pavlokovach.art
+git status --short
+```
+
+If the checkout is dirty and the changes are only local server leftovers, clean it and pull again:
+
+```bash
+cd /home/kovachpa/repositories/pavlokovach.art
+git reset --hard HEAD
+git clean -fd
+git pull --ff-only origin main
+```
+
+Then return to **Git Version Control** and run `Deploy HEAD Commit` again.
 
 ## First-Time Production Setup
 
