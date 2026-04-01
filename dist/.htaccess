@@ -7,6 +7,11 @@ DirectoryIndex index.html
 # Enable BrowserRouter (SPA) Fallback
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  RewriteCond %{HTTP_HOST} ^www\.pavlokovach\.art$ [NC]
+  RewriteRule ^ https://pavlokovach.art%{REQUEST_URI} [R=301,L]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP_HOST} ^pavlokovach\.art$ [NC]
+  RewriteRule ^ https://pavlokovach.art%{REQUEST_URI} [R=301,L]
   RewriteBase /
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_URI} !^/api/
