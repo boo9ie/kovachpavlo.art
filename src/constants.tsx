@@ -44,15 +44,6 @@ export const INITIAL_EXHIBITIONS: ExhibitionItem[] = [
       { url: 'https://images.unsplash.com/photo-1482160549442-2d79128c7185?auto=format&fit=crop&w=1200&q=80', type: 'image', photographer: 'Yulianna Kovach' }
     ],
     location: 'Detenpyla Gallery, Ukraine, Lviv'
-  },
-  {
-    id: '3',
-    title: 'Test Exhibition',
-    author: 'Pavlo Kovach',
-    date: '01.01.2024',
-    description: 'This is a test exhibition description.',
-    photos: [],
-    location: 'Lviv'
   }
 ];
 
@@ -64,7 +55,6 @@ export const INITIAL_WORKS: WorkItem[] = [
     date: '2024',
     description: 'A multi-channel video installation featuring people who survived the war in Ukraine, reproducing the sounds of various weapons and alarms. The project was presented at the Pavilion of Ukraine at the 60th Venice Biennale.',
     media: [
-      { url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', type: 'video' },
       { url: 'https://images.unsplash.com/photo-1515405299443-f71bb768a795?auto=format&fit=crop&w=1200&q=80', type: 'image', photographer: 'Venice Biennale Press' },
       { url: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1200&q=80', type: 'image', photographer: 'Open Group' }
     ]
@@ -76,7 +66,6 @@ export const INITIAL_WORKS: WorkItem[] = [
     date: '2022',
     description: 'A study of landscape perception from a distance. The video documents the process of looking through a telescope at a point located 1000 kilometers away, reflecting on the impossibility of truly seeing what is happening in the distance.',
     media: [
-      { url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', type: 'video' },
       { url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80', type: 'image', photographer: 'Pavlo Kovach jr.' }
     ]
   },

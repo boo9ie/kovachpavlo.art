@@ -3,6 +3,15 @@ import { NewsItem, ExhibitionItem, WorkItem, AboutData, ContactData } from '../.
 import { API_SAVE_URL, API_UPLOAD_URL, API_LOGIN_URL, API_LOGOUT_URL, API_AUTH_STATUS_URL, apiPost, apiGet } from '../../utils/api';
 import { FormLabel, AdminInput, AdminTextarea } from '../Shared/SharedUI';
 
+const isValidNewsUrl = (value: string) => {
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
+};
+
 export const AdminPanel = ({ 
   news, setNews, 
   exhibitions, setExhibitions, 
@@ -232,11 +241,20 @@ export const AdminPanel = ({
   };
 
   const handleSaveNews = () => {
-    if (!newNews.title || !newNews.photo) return alert("Required fields are empty");
+    const trimmedUrl = (newNews.url || '').trim();
+
+    if (!newNews.title || !newNews.photo || !trimmedUrl) {
+      return alert("News title, URL, and cover image are required.");
+    }
+
+    if (!isValidNewsUrl(trimmedUrl)) {
+      return alert("Please enter a valid news URL starting with http:// or https://");
+    }
+
     if (editingId) {
-      setNews(news.map((item: NewsItem) => item.id === editingId ? { ...item, ...newNews } : item));
+      setNews(news.map((item: NewsItem) => item.id === editingId ? { ...item, ...newNews, url: trimmedUrl } : item));
     } else {
-      setNews([{ ...newNews, id: Date.now().toString(), date: newNews.date || new Date().toLocaleDateString(), url: newNews.url || '#' } as NewsItem, ...news]);
+      setNews([{ ...newNews, id: Date.now().toString(), date: newNews.date || new Date().toLocaleDateString(), url: trimmedUrl } as NewsItem, ...news]);
     }
     resetForms();
   };
@@ -350,9 +368,9 @@ export const AdminPanel = ({
                   <div className="space-y-4">
                     <FormLabel required>News Title</FormLabel>
                     <AdminInput placeholder="e.g. Venice Biennale 2024" value={newNews.title || ''} onChange={e => setNewNews({...newNews, title: e.target.value})} />
-                    <FormLabel>Publication Date</FormLabel>
+                    <FormLabel>News Date</FormLabel>
                     <AdminInput placeholder="YYYY-MMM-DD" value={newNews.date || ''} onChange={e => setNewNews({...newNews, date: e.target.value})} />
-                    <FormLabel>External URL</FormLabel>
+                    <FormLabel required>External URL</FormLabel>
                     <AdminInput placeholder="https://..." value={newNews.url || ''} onChange={e => setNewNews({...newNews, url: e.target.value})} />
                   </div>
                   <div className="space-y-4">

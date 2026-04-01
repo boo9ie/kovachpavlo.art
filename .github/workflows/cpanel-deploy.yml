@@ -41,7 +41,6 @@ jobs:
         run: |
           mkdir -p dist/api
           rsync -av --exclude='data.json' public/api/ dist/api/ || true
-          cp .htaccess dist/ || true
 
       - name: Commit generated artifacts
         run: |

@@ -2,6 +2,12 @@
 
 Use this checklist after the GitHub Actions build finishes and cPanel has deployed the latest `main`.
 
+## Build Output
+
+- [ ] `npm run build` completes successfully
+- [ ] `dist/.htaccess` exists after the build
+- [ ] `dist/.htaccess` contains HTTPS, `www` to apex, and SPA rewrite rules
+
 ## Public Routes
 
 - [ ] `/` opens without a white screen
@@ -34,6 +40,8 @@ Use this checklist after the GitHub Actions build finishes and cPanel has deploy
 - [ ] Saved content is still present after a page reload
 - [ ] Image upload succeeds
 - [ ] Video upload succeeds
+- [ ] News entries only save with real external URLs
+- [ ] Public `/news` entries do not render broken `#` links
 - [ ] `private/content.json` remains valid JSON after save
 
 ## Deploy Persistence

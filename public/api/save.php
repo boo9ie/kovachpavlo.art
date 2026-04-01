@@ -50,6 +50,8 @@ function is_news_item_list($value) {
     }
 
     foreach ($value as $item) {
+        $url = isset($item['url']) && is_string($item['url']) ? trim($item['url']) : '';
+
         if (
             !is_array($item) ||
             !isset($item['id'], $item['title'], $item['date'], $item['photo'], $item['url']) ||
@@ -57,7 +59,12 @@ function is_news_item_list($value) {
             !is_string($item['title']) ||
             !is_string($item['date']) ||
             !is_string($item['photo']) ||
-            !is_string($item['url'])
+            !is_string($item['url']) ||
+            trim($item['title']) === '' ||
+            trim($item['photo']) === '' ||
+            $url === '' ||
+            filter_var($url, FILTER_VALIDATE_URL) === false ||
+            !in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'], true)
         ) {
             return false;
         }

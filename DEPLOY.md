@@ -8,9 +8,10 @@ The GitHub Action in `.github/workflows/cpanel-deploy.yml` currently:
 1. Generate `package-lock.json` on the first run if it does not exist yet.
 2. Install dependencies with `npm ci`.
 3. Build the project using Node.js/Vite.
-4. Run `php -l` on PHP API and utility scripts.
-5. Copy PHP backend files into `dist/api/`.
-6. Commit the built `dist/` output plus `package-lock.json` back into `main`.
+4. Copy the production `.htaccess` file into `dist/.htaccess` during the build flow.
+5. Run `php -l` on PHP API and utility scripts.
+6. Copy PHP backend files into `dist/api/`.
+7. Commit the built `dist/` output plus `package-lock.json` back into `main`.
 
 After cPanel pulls the latest repository state and runs `.cpanel.yml`, deployment:
 - wipes old files from `public_html` except `.well-known`
@@ -20,6 +21,8 @@ After cPanel pulls the latest repository state and runs `.cpanel.yml`, deploymen
 - creates `/home/kovachpa/private/content.json` only if it does not exist yet
 
 This prevents deploys from overwriting the real production password hash or wiping live uploaded media.
+
+Before any cPanel deploy, confirm that `npm run build` produced `dist/.htaccess`. That file is part of the release artifact and carries the live HTTPS redirect, `www` to apex redirect, and SPA rewrite rules.
 
 `.cpanel.yml` must stay in the repository root for cPanel to execute it.
 The current `.cpanel.yml` uses absolute paths instead of exported shell variables so cPanel can execute each task deterministically.
@@ -122,6 +125,7 @@ Then verify:
 - image upload works
 - video upload works
 - production does not show bundled demo content if `/api/content.php` fails
+- news entries open real external URLs and do not render broken `#` links
 - `wp-admin`, `wp-content`, and `wp-includes` no longer resolve as live legacy content
 
 For the full pass/fail checklist, use `RELEASE_CHECKLIST.md`.
@@ -129,3 +133,7 @@ For the full pass/fail checklist, use `RELEASE_CHECKLIST.md`.
 ## Legacy Cleanup Note
 
 After the final deploy, confirm that old WordPress URLs no longer return the previous site. If Google Search Console still shows stale URLs or snippets, request reindexing or add narrow 404/410 cleanup rules as a follow-up. The deploy flow itself already removes the old public files from `public_html`.
+
+## Future Improvement
+
+If you later want richer indexing, build-time generation of detail-page sitemap entries for `/works/:id` and `/exhibition/:id` is the next low-risk SEO improvement.
