@@ -126,23 +126,29 @@ export const AdminPanel = ({
     }
   };
 
-  // Immediate Deletion Handlers - No more window.confirm
+  // Deletion Handlers with confirmation
   const onDeleteNews = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setNews((prev: NewsItem[]) => prev.filter(item => String(item.id) !== String(id)));
+    if (window.confirm("Are you sure you want to delete this news event?")) {
+      setNews((prev: NewsItem[]) => prev.filter(item => String(item.id) !== String(id)));
+    }
   };
 
   const onDeleteExhibition = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setExhibitions((prev: ExhibitionItem[]) => prev.filter(item => String(item.id) !== String(id)));
+    if (window.confirm("Are you sure you want to delete this exhibition event?")) {
+      setExhibitions((prev: ExhibitionItem[]) => prev.filter(item => String(item.id) !== String(id)));
+    }
   };
 
   const onDeleteWork = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setWorks((prev: WorkItem[]) => prev.filter(item => String(item.id) !== String(id)));
+    if (window.confirm("Are you sure you want to delete this work event?")) {
+      setWorks((prev: WorkItem[]) => prev.filter(item => String(item.id) !== String(id)));
+    }
   };
 
   const handleEditNews = (item: NewsItem) => {
