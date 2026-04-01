@@ -17,7 +17,7 @@ export const WorksPage = ({ items }: { items: WorkItem[] }) => {
         {sortedItems.map((item) => (
           <Link 
             key={item.id} 
-            to={`/work/${item.id}`}
+            to={`/works/${item.id}`}
             className="flex flex-col group"
             onMouseEnter={() => setHoveredId(item.id)}
             onMouseLeave={() => setHoveredId(null)}

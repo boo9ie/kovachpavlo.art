@@ -42,13 +42,16 @@ export const SeoManager = ({ exhibitions, works }: { exhibitions: ExhibitionItem
     let robots = 'index,follow';
     let ogType = 'website';
     let image = defaultImage;
+    let canonicalPath = path || '/';
 
-    if (path === '/') {
+    if (path === '/' || path === '/exhibitions') {
       title = `${SITE_NAME} | Exhibitions`;
       description = 'Selected exhibitions, installations, and documentation from the practice of Pavlo Kovach.';
-    } else if (path === '/news') {
-      title = `${SITE_NAME} | News`;
+      canonicalPath = '/';
+    } else if (path === '/publications' || path === '/news') {
+      title = `${SITE_NAME} | Publications`;
       description = 'Recent announcements, exhibitions, and external features related to Pavlo Kovach.';
+      canonicalPath = '/publications';
     } else if (path === '/works') {
       title = `${SITE_NAME} | Works`;
       description = 'Browse artworks, moving-image projects, and documentation from Pavlo Kovach.';
@@ -72,6 +75,18 @@ export const SeoManager = ({ exhibitions, works }: { exhibitions: ExhibitionItem
         description = work.description || `Artwork by ${work.author} on ${SITE_NAME}.`;
         image = work.media?.[0]?.url ?? defaultImage;
         ogType = 'article';
+        canonicalPath = `/works/${work.id}`;
+      }
+    } else if (path.startsWith('/works/')) {
+      const workId = path.split('/').pop();
+      const work = works.find((item) => item.id === workId);
+
+      if (work) {
+        title = `${work.title} | ${SITE_NAME}`;
+        description = work.description || `Artwork by ${work.author} on ${SITE_NAME}.`;
+        image = work.media?.[0]?.url ?? defaultImage;
+        ogType = 'article';
+        canonicalPath = `/works/${work.id}`;
       }
     } else if (path.startsWith('/exhibition/')) {
       const exhibitionId = path.split('/').pop();
@@ -85,7 +100,7 @@ export const SeoManager = ({ exhibitions, works }: { exhibitions: ExhibitionItem
       }
     }
 
-    const canonicalUrl = new URL(path || '/', SITE_URL).toString();
+    const canonicalUrl = new URL(canonicalPath, SITE_URL).toString();
     document.title = title;
     upsertMeta('meta[name="description"]', 'name', 'description', description);
     upsertMeta('meta[name="robots"]', 'name', 'robots', robots);

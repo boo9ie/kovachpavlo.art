@@ -10,7 +10,8 @@ Portfolio site for Pavlo Kovach built with React + Vite and deployed to cPanel/A
 
 - Frontend: React 18, React Router, Vite, Tailwind CSS
 - Backend endpoints: PHP in `public/api/`
-- Private server-side storage: `private/content.json`, `private/config.php`
+- Private server-side storage: `private/content.json`
+- Production-only server config: `private/config.php` created from `private/config.example.php`
 - Hosting target: cPanel/Apache with `.htaccess` SPA rewrites
 
 ## Local Development
@@ -18,7 +19,7 @@ Portfolio site for Pavlo Kovach built with React + Vite and deployed to cPanel/A
 Prerequisite: Node.js 18+.
 
 1. Install dependencies:
-   `npm install`
+   `npm ci`
 2. Start the dev server:
    `npm run dev`
 3. Build production assets:
@@ -27,9 +28,11 @@ Prerequisite: Node.js 18+.
 ## Admin Authentication
 
 - Admin login is handled by PHP sessions, not client-side hashing.
-- Set `ADMIN_PASSWORD_HASH` in `private/config.php` before using `/admin` in production.
-- Generate a hash with PHP:
-  `php -r "echo password_hash('your-new-password', PASSWORD_DEFAULT), PHP_EOL;"`
+- The repository keeps only `private/config.example.php`. Do not commit a real `private/config.php`.
+- Generate a password hash with:
+  `php scripts/generate-password-hash.php "your-strong-password"`
+- Create `private/config.php` on the server from the example and paste the generated hash.
+- If `private/config.php` is missing or empty, `/api/login.php` returns `500` with `Admin password hash is not configured`.
 
 ## Content Storage
 
@@ -40,3 +43,9 @@ Prerequisite: Node.js 18+.
 ## Deployment
 
 See `DEPLOY.md` for the cPanel/GitHub Actions workflow.
+
+## What Not To Commit
+
+- Do not commit `private/config.php`
+- Do not commit a real admin password hash into tracked files
+- Do not edit files directly inside production `public_html`; deploy through Git + cPanel

@@ -4,7 +4,7 @@ deployment:
     - export DEPLOYPATH=/home/kovachpa/public_html/
     - export PRIVATEPATH=/home/kovachpa/private/
     - /bin/mkdir -p $PRIVATEPATH
+    - if [ ! -f "$PRIVATEPATH/config.php" ]; then /bin/cp -p private/config.example.php "$PRIVATEPATH/config.php"; echo "Created $PRIVATEPATH/config.php from config.example.php. Set ADMIN_PASSWORD_HASH before using /admin."; fi
+    - if [ ! -f "$PRIVATEPATH/content.json" ]; then /bin/cp -p private/content.json "$PRIVATEPATH/content.json"; fi
     - /bin/find $DEPLOYPATH -mindepth 1 -maxdepth 1 ! -name '.well-known' ! -name 'uploads' -exec /bin/rm -rf {} +
     - /bin/cp -R dist/. $DEPLOYPATH
-    - /bin/cp -p private/config.php $PRIVATEPATH
-    - /bin/cp -n private/content.json $PRIVATEPATH || true

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import { 
   INITIAL_NEWS, 
   INITIAL_EXHIBITIONS, 
@@ -97,10 +97,13 @@ export default function App() {
         <main className="flex-grow pb-24">
           <Routes>
             <Route path="/" element={<Home items={exhibitions} />} />
+            <Route path="/exhibitions" element={<Home items={exhibitions} />} />
             <Route path="/exhibition/:id" element={<ExhibitionDetail items={exhibitions} />} />
-            <Route path="/news" element={<NewsList items={news} />} />
+            <Route path="/publications" element={<NewsList items={news} />} />
+            <Route path="/news" element={<Navigate to="/publications" replace />} />
             <Route path="/works" element={<WorksPage items={works} />} />
             <Route path="/work/:id" element={<WorkDetail items={works} />} />
+            <Route path="/works/:id" element={<WorkDetail items={works} />} />
             <Route path="/about" element={<AboutPage data={about} />} />
             <Route path="/contact" element={<ContactPage data={contact} />} />
             <Route path="/admin" element={

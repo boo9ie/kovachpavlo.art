@@ -19,17 +19,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
+
+      - name: Ensure package lock
+        run: |
+          if [ ! -f package-lock.json ]; then
+            npm install --package-lock-only
+          fi
 
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm ci
 
       - name: Build project
         run: npm run build
+
+      - name: PHP syntax check
+        run: |
+          find public/api scripts -name '*.php' -print0 | xargs -0 -n1 php -l
 
       - name: Copy backend files and configs
         run: |
@@ -37,7 +43,7 @@ jobs:
           rsync -av --exclude='data.json' public/api/ dist/api/ || true
           cp .htaccess dist/ || true
 
-      - name: Commit dist folder to main
+      - name: Commit generated artifacts
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
