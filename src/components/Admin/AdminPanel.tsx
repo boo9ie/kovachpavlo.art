@@ -376,7 +376,7 @@ export const AdminPanel = ({
                     <FormLabel required>News Title</FormLabel>
                     <AdminInput placeholder="e.g. Venice Biennale 2024" value={newNews.title || ''} onChange={e => setNewNews({...newNews, title: e.target.value})} />
                     <FormLabel>Publication Date</FormLabel>
-                    <AdminInput placeholder="DD.MM.YYYY" value={newNews.date || ''} onChange={e => setNewNews({...newNews, date: e.target.value})} />
+                    <AdminInput placeholder="YYYY-MMM-DD" value={newNews.date || ''} onChange={e => setNewNews({...newNews, date: e.target.value})} />
                     <FormLabel>External URL</FormLabel>
                     <AdminInput placeholder="https://..." value={newNews.url || ''} onChange={e => setNewNews({...newNews, url: e.target.value})} />
                   </div>
@@ -436,7 +436,7 @@ export const AdminPanel = ({
                    </div>
                    <div className="space-y-4">
                      <FormLabel>Exhibition Date</FormLabel>
-                     <AdminInput placeholder="DD.MM.YYYY" value={newExhib.date || ''} onChange={e => setNewExhib({...newExhib, date: e.target.value})} />
+                     <AdminInput placeholder="YYYY-MMM-DD" value={newExhib.date || ''} onChange={e => setNewExhib({...newExhib, date: e.target.value})} />
                    </div>
                    <div className="col-span-2 space-y-4">
                      <FormLabel>Venue & Location</FormLabel>
