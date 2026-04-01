@@ -48,10 +48,10 @@ export const SeoManager = ({ exhibitions, works }: { exhibitions: ExhibitionItem
       title = `${SITE_NAME} | Exhibitions`;
       description = 'Selected exhibitions, installations, and documentation from the practice of Pavlo Kovach.';
       canonicalPath = '/';
-    } else if (path === '/publications' || path === '/news') {
-      title = `${SITE_NAME} | Publications`;
+    } else if (path === '/news') {
+      title = `${SITE_NAME} | News`;
       description = 'Recent announcements, exhibitions, and external features related to Pavlo Kovach.';
-      canonicalPath = '/publications';
+      canonicalPath = '/news';
     } else if (path === '/works') {
       title = `${SITE_NAME} | Works`;
       description = 'Browse artworks, moving-image projects, and documentation from Pavlo Kovach.';
@@ -66,17 +66,6 @@ export const SeoManager = ({ exhibitions, works }: { exhibitions: ExhibitionItem
       title = `${SITE_NAME} | Admin`;
       description = 'Administrative access for content management.';
       robots = 'noindex,nofollow';
-    } else if (path.startsWith('/work/')) {
-      const workId = path.split('/').pop();
-      const work = works.find((item) => item.id === workId);
-
-      if (work) {
-        title = `${work.title} | ${SITE_NAME}`;
-        description = work.description || `Artwork by ${work.author} on ${SITE_NAME}.`;
-        image = work.media?.[0]?.url ?? defaultImage;
-        ogType = 'article';
-        canonicalPath = `/works/${work.id}`;
-      }
     } else if (path.startsWith('/works/')) {
       const workId = path.split('/').pop();
       const work = works.find((item) => item.id === workId);

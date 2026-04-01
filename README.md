@@ -30,7 +30,8 @@ Prerequisites:
 Notes:
 - `npm run dev` covers the React frontend.
 - Admin login, save, upload, and logout are PHP endpoints under `public/api/`. To test the full admin flow locally you need a PHP-capable host or staging environment that serves those endpoints.
-- If the PHP API is unavailable during frontend development, the site falls back to the bundled initial content.
+- Bundled `INITIAL_*` demo content is used only in development when the PHP API is unavailable.
+- Production must load live content from `/api/content.php`; if that fails, the site shows an explicit error state instead of demo content.
 
 ## Build Output
 
@@ -92,6 +93,7 @@ The deploy process preserves:
 - `public_html/.well-known`
 - `/home/USERNAME/private/config.php`
 - `/home/USERNAME/private/content.json`
+- canonical host `https://pavlokovach.art` via `.htaccess` HTTPS + apex redirect
 
 ## What Not To Commit
 

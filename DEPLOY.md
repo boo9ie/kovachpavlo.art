@@ -23,6 +23,13 @@ This prevents deploys from overwriting the real production password hash or wipi
 
 `.cpanel.yml` must stay in the repository root for cPanel to execute it.
 
+The production site uses one canonical host only:
+- `https://pavlokovach.art`
+
+`.htaccess` redirects:
+- `http://pavlokovach.art` -> `https://pavlokovach.art`
+- `https://www.pavlokovach.art` -> `https://pavlokovach.art`
+
 ## cPanel Setup
 
 To connect this automated workflow to your cPanel hosting:
@@ -77,7 +84,7 @@ After `Deploy HEAD Commit`, check:
 - `/works`
 - `/about`
 - `/exhibitions`
-- `/publications`
+- `/news`
 - `/contact`
 - `/robots.txt`
 - `/sitemap.xml`
@@ -85,9 +92,11 @@ After `Deploy HEAD Commit`, check:
 
 Then verify:
 - admin login works with the configured password hash
+- `https://www.pavlokovach.art` redirects to `https://pavlokovach.art`
 - save updates persist after reload
 - image upload works
 - video upload works
+- production does not show bundled demo content if `/api/content.php` fails
 - `wp-admin`, `wp-content`, and `wp-includes` no longer resolve as live legacy content
 
 For the full pass/fail checklist, use `RELEASE_CHECKLIST.md`.

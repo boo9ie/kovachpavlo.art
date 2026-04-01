@@ -8,7 +8,7 @@ Use this checklist after the GitHub Actions build finishes and cPanel has deploy
 - [ ] `/works` opens without a white screen
 - [ ] `/about` opens
 - [ ] `/exhibitions` opens
-- [ ] `/publications` opens
+- [ ] `/news` opens
 - [ ] `/contact` opens
 - [ ] `/works/:id` opens for at least one real work detail page
 
@@ -16,7 +16,7 @@ Use this checklist after the GitHub Actions build finishes and cPanel has deploy
 
 - [ ] Refresh on `/works` does not return `404`
 - [ ] Refresh on `/about` does not return `404`
-- [ ] Refresh on `/publications` does not return `404`
+- [ ] Refresh on `/news` does not return `404`
 - [ ] `/api/content.php` still responds after the SPA rewrite rules
 - [ ] `/api/auth-status.php` still responds after the SPA rewrite rules
 
@@ -42,6 +42,7 @@ Use this checklist after the GitHub Actions build finishes and cPanel has deploy
 - [ ] `public_html/.well-known` is still present after deploy
 - [ ] `/home/USERNAME/private/config.php` was not overwritten during deploy
 - [ ] `/home/USERNAME/private/content.json` was not overwritten during redeploy
+- [ ] Production does not show bundled demo content when `/api/content.php` fails
 
 ## Legacy Cleanup
 
@@ -57,6 +58,7 @@ Use this checklist after the GitHub Actions build finishes and cPanel has deploy
 - [ ] Canonical URL exists on each main route
 - [ ] `/robots.txt` is reachable
 - [ ] `/sitemap.xml` is reachable
+- [ ] `https://www.pavlokovach.art` redirects to `https://pavlokovach.art`
 
 ## Security Headers
 

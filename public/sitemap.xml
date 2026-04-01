@@ -11,7 +11,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://pavlokovach.art/publications</loc>
+    <loc>https://pavlokovach.art/news</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pavlokovach.art/exhibitions</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
