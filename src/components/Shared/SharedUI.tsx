@@ -50,7 +50,7 @@ export const ExpandableText = ({ text, limit = 160, className = "text-sm text-gr
   );
 };
 
-export const MediaPreview = ({ item, isHovered }: { item?: MediaItem, isHovered: boolean }) => {
+export const MediaPreview = ({ item, isHovered, objectFit = 'cover' }: { item?: MediaItem, isHovered: boolean, objectFit?: 'contain' | 'cover' }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -138,7 +138,7 @@ export const MediaPreview = ({ item, isHovered }: { item?: MediaItem, isHovered:
             console.error("Video load error for", item.url, e);
             setError(true);
           }}
-          className={`w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${filterClass} ${isReady ? 'opacity-100' : 'opacity-0'}`}
+          className={`w-full h-full object-${objectFit} transition-opacity duration-1000 ease-in-out ${filterClass} ${isReady ? 'opacity-100' : 'opacity-0'}`}
         >
           <source src={item.url} type={item.url.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
         </video>
@@ -148,7 +148,7 @@ export const MediaPreview = ({ item, isHovered }: { item?: MediaItem, isHovered:
           alt="Preview" 
           onLoad={() => setIsReady(true)}
           onError={() => setError(true)}
-          className={`w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${filterClass} ${isReady ? 'opacity-100' : 'opacity-0'}`} 
+          className={`w-full h-full object-${objectFit} transition-opacity duration-1000 ease-in-out ${filterClass} ${isReady ? 'opacity-100' : 'opacity-0'}`} 
         />
       )}
       

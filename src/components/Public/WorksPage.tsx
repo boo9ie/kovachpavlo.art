@@ -7,10 +7,14 @@ import { MediaPreview, ExpandableText } from '../Shared/SharedUI';
 export const WorksPage = ({ items }: { items: WorkItem[] }) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
+  const sortedItems = [...items].sort((a, b) => {
+    return (b.date || '').localeCompare(a.date || '');
+  });
+
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mt-8">
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <Link 
             key={item.id} 
             to={`/work/${item.id}`}
@@ -22,6 +26,7 @@ export const WorksPage = ({ items }: { items: WorkItem[] }) => {
               <MediaPreview 
                 item={(item.media || [])[0]} 
                 isHovered={hoveredId === item.id} 
+                objectFit="contain"
               />
             </div>
             <div className="border-t border-black pt-4">
