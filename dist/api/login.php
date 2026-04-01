@@ -24,7 +24,15 @@ if (!isset($input['password'])) {
     exit;
 }
 
-require_once __DIR__ . '/../../private/config.php';
+$configPath = __DIR__ . '/../../private/config.php';
+
+if (!file_exists($configPath)) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Admin password hash is not configured']);
+    exit;
+}
+
+require_once $configPath;
 
 if (!defined('ADMIN_PASSWORD_HASH') || ADMIN_PASSWORD_HASH === '') {
     http_response_code(500);
