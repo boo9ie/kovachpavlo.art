@@ -1,17 +1,11 @@
 <?php
-session_start();
-header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/_session.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    json_response(['error' => 'Method not allowed'], 405);
 }
 
-if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
+require_admin_auth();
 
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
@@ -137,20 +131,15 @@ function is_contact_payload($value) {
         && is_string($value['whatsapp']);
 }
 
-if (!$data) {
-    error_log("Save Error: Invalid JSON received in payload.");
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid JSON']);
-    exit;
+if (!is_array($data)) {
+    json_response(['error' => 'Invalid JSON'], 400);
 }
 
 $requiredKeys = ['news', 'exhibitions', 'works', 'about', 'contact'];
 
 foreach ($requiredKeys as $key) {
     if (!array_key_exists($key, $data)) {
-        http_response_code(400);
-        echo json_encode(['error' => "Missing required payload key: {$key}"]);
-        exit;
+        json_response(['error' => "Missing required payload key: {$key}"], 400);
     }
 }
 
@@ -161,9 +150,7 @@ if (
     !is_about_payload($data['about']) ||
     !is_contact_payload($data['contact'])
 ) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid content structure']);
-    exit;
+    json_response(['error' => 'Invalid content structure'], 400);
 }
 
 $payload = [
@@ -175,22 +162,15 @@ $payload = [
 ];
 
 $file = __DIR__ . '/../../private/content.json';
-// Atomically save using temp file and rename to avoid corruption during concurrent saves
 $tempFile = $file . '.' . uniqid() . '.tmp';
 
-// write to temp file
 if (file_put_contents($tempFile, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false) {
-    // rename is atomic on POSIX
     if (rename($tempFile, $file)) {
-        echo json_encode(['success' => true]);
+        json_response(['success' => true]);
     } else {
         unlink($tempFile);
-        error_log("Save Error: Failed to rename temp file to content.json.");
-        http_response_code(500);
-        echo json_encode(['error' => 'Failed to save file']);
+        json_response(['error' => 'Failed to save file'], 500);
     }
 } else {
-    error_log("Save Error: Failed to write to temp file.");
-    http_response_code(500);
-    echo json_encode(['error' => 'Failed to write file']);
+    json_response(['error' => 'Failed to write file'], 500);
 }

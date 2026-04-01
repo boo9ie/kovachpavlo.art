@@ -1,36 +1,49 @@
 <?php
-session_start();
-header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/_session.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    json_response(['error' => 'Method not allowed'], 405);
 }
 
-if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
+require_admin_auth();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_FILES['file'])) {
-    http_response_code(400);
-    echo json_encode(['error' => 'No file uploaded']);
-    exit;
+if (!isset($_FILES['file'])) {
+    json_response(['error' => 'No file uploaded'], 400);
 }
 
 $file = $_FILES['file'];
 
+function upload_error_message(int $code): string {
+    switch ($code) {
+        case UPLOAD_ERR_INI_SIZE:
+        case UPLOAD_ERR_FORM_SIZE:
+            return 'Uploaded file is too large';
+        case UPLOAD_ERR_PARTIAL:
+            return 'Upload was interrupted';
+        case UPLOAD_ERR_NO_FILE:
+            return 'No file uploaded';
+        default:
+            return 'Upload failed';
+    }
+}
+
 if ($file['error'] !== UPLOAD_ERR_OK) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Upload failed with error code: ' . $file['error']]);
-    exit;
+    json_response(['error' => upload_error_message((int) $file['error'])], 400);
 }
 
 // Detect true MIME type
 $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+if ($finfo === false) {
+    json_response(['error' => 'Failed to inspect uploaded file'], 500);
+}
+
 $mimeType = finfo_file($finfo, $file['tmp_name']);
 finfo_close($finfo);
+
+if ($mimeType === false) {
+    json_response(['error' => 'Failed to inspect uploaded file'], 500);
+}
 
 // Restrict uploads to a known-safe allowlist instead of all image/* and video/*
 $allowedMimeTypes = [
@@ -40,16 +53,14 @@ $allowedMimeTypes = [
 ];
 
 if (!isset($allowedMimeTypes[$mimeType])) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid file type. Allowed: JPG, PNG, GIF, WEBP, MP4, WEBM, OGG, MOV.']);
-    exit;
+    json_response(['error' => 'Invalid file type. Allowed: JPG, PNG, GIF, WEBP, MP4, WEBM, OGG, MOV.'], 400);
 }
 
 $extension = $allowedMimeTypes[$mimeType];
 
 $uploadDir = __DIR__ . '/../uploads/';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
+if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+    json_response(['error' => 'Failed to create upload directory'], 500);
 }
 
 // Generate random filename
@@ -57,14 +68,13 @@ $newFileName = bin2hex(random_bytes(16)) . '.' . $extension;
 $destination = $uploadDir . $newFileName;
 
 if (move_uploaded_file($file['tmp_name'], $destination)) {
-    echo json_encode([
+    json_response([
         'success' => true,
         'url' => '/uploads/' . $newFileName,
         'mime' => $mimeType,
         'size' => filesize($destination),
         'original_name' => basename($file['name'])
     ]);
-} else {
-    http_response_code(500);
-    echo json_encode(['error' => 'Failed to move uploaded file']);
 }
+
+json_response(['error' => 'Failed to move uploaded file'], 500);

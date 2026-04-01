@@ -1,54 +1,41 @@
 <?php
-session_set_cookie_params([
-    "lifetime" => 86400 * 30, // 30 days
-    "path" => "/",
-    "samesite" => "Lax",
-    "secure" => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
-    "httponly" => true
-]);
-session_start();
-
-header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/_session.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Method not allowed']);
-    exit;
+    json_response(['error' => 'Method not allowed'], 405);
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
 
-if (!isset($input['password'])) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Password required']);
-    exit;
+if (
+    !is_array($input) ||
+    !isset($input['password']) ||
+    !is_string($input['password']) ||
+    trim($input['password']) === ''
+) {
+    json_response(['error' => 'Password required'], 400);
 }
 
 $configPath = __DIR__ . '/../../private/config.php';
 
-if (!file_exists($configPath)) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Admin password hash is not configured']);
-    exit;
+if (!is_file($configPath)) {
+    json_response(['error' => 'Admin password hash is not configured'], 500);
 }
 
 require_once $configPath;
 
-if (!defined('ADMIN_PASSWORD_HASH') || ADMIN_PASSWORD_HASH === '') {
-    http_response_code(500);
-    echo json_encode(['error' => 'Admin password hash is not configured']);
-    exit;
+if (!defined('ADMIN_PASSWORD_HASH') || !is_string(ADMIN_PASSWORD_HASH) || trim(ADMIN_PASSWORD_HASH) === '') {
+    json_response(['error' => 'Admin password hash is not configured'], 500);
 }
 
 $hash = ADMIN_PASSWORD_HASH;
 
 if (password_verify($input['password'], $hash)) {
+    bootstrap_session();
     session_regenerate_id(true);
     $_SESSION['authenticated'] = true;
-    echo json_encode(['success' => true]);
-} else {
-    http_response_code(401);
-    // Add deliberate delay to mitigate straightforward brute force
-    usleep(500000);
-    echo json_encode(['error' => 'Invalid password']);
+    json_response(['success' => true]);
 }
+
+usleep(500000);
+json_response(['error' => 'Invalid password'], 401);
