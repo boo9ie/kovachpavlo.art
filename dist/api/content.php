@@ -1,10 +1,4 @@
 <?php
-$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*';
-if ($origin !== '*') {
-    header("Access-Control-Allow-Origin: $origin");
-} else {
-    header("Access-Control-Allow-Origin: *");
-}
 header('Content-Type: application/json; charset=utf-8');
 
 $dataFile = __DIR__ . '/../../private/content.json';
