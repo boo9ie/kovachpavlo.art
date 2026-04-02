@@ -7,6 +7,35 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_admin_auth();
 
+function ini_size_to_bytes(string $value): int {
+    $value = trim($value);
+
+    if ($value === '') {
+        return 0;
+    }
+
+    $unit = strtolower(substr($value, -1));
+    $bytes = (float) $value;
+
+    switch ($unit) {
+        case 'g':
+            $bytes *= 1024;
+        case 'm':
+            $bytes *= 1024;
+        case 'k':
+            $bytes *= 1024;
+    }
+
+    return (int) round($bytes);
+}
+
+$contentLength = isset($_SERVER['CONTENT_LENGTH']) ? (int) $_SERVER['CONTENT_LENGTH'] : 0;
+$postMaxSize = ini_size_to_bytes((string) ini_get('post_max_size'));
+
+if ($contentLength > 0 && $postMaxSize > 0 && $contentLength > $postMaxSize) {
+    json_response(['error' => 'Uploaded file exceeds the current server post size limit.'], 413);
+}
+
 if (!isset($_FILES['file'])) {
     json_response(['error' => 'No file uploaded'], 400);
 }
@@ -28,7 +57,8 @@ function upload_error_message(int $code): string {
 }
 
 if ($file['error'] !== UPLOAD_ERR_OK) {
-    json_response(['error' => upload_error_message((int) $file['error'])], 400);
+    $statusCode = in_array((int) $file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) ? 413 : 400;
+    json_response(['error' => upload_error_message((int) $file['error'])], $statusCode);
 }
 
 // Detect true MIME type
