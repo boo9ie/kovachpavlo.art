@@ -4,12 +4,16 @@ import { fileURLToPath } from 'node:url';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(currentDir, '..');
-const sourcePath = resolve(projectRoot, '.htaccess');
-const destinationPath = resolve(projectRoot, 'dist', '.htaccess');
+const deployFiles = ['.htaccess', '.user.ini'];
 
-if (!existsSync(sourcePath)) {
-  throw new Error('Missing root .htaccess file. Build output cannot be deployed safely.');
+for (const fileName of deployFiles) {
+  const sourcePath = resolve(projectRoot, fileName);
+  const destinationPath = resolve(projectRoot, 'dist', fileName);
+
+  if (!existsSync(sourcePath)) {
+    throw new Error(`Missing required deploy file: ${fileName}`);
+  }
+
+  mkdirSync(dirname(destinationPath), { recursive: true });
+  copyFileSync(sourcePath, destinationPath);
 }
-
-mkdirSync(dirname(destinationPath), { recursive: true });
-copyFileSync(sourcePath, destinationPath);

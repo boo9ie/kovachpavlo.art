@@ -6,6 +6,7 @@ Use this checklist after the GitHub Actions build finishes and cPanel has deploy
 
 - [ ] `npm run build` completes successfully
 - [ ] `dist/.htaccess` exists after the build
+- [ ] `dist/.user.ini` exists after the build
 - [ ] `dist/.htaccess` contains HTTPS, `www` to apex, and SPA rewrite rules
 
 ## Public Routes

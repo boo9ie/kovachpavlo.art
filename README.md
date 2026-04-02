@@ -32,7 +32,7 @@ Notes:
 - Admin login, save, upload, and logout are PHP endpoints under `public/api/`. To test the full admin flow locally you need a PHP-capable host or staging environment that serves those endpoints.
 - Bundled `INITIAL_*` fallback data is intentionally empty and used only in development when the PHP API is unavailable.
 - Production must load live content from `/api/content.php`; if that fails, the site shows an explicit error state instead of any bundled content.
-- `npm run build` automatically copies the root `.htaccess` into `dist/.htaccess`, so the deployable output keeps HTTPS, apex-host, and SPA rewrite rules.
+- `npm run build` automatically copies the root `.htaccess` and `.user.ini` into `dist/`, so the deployable output keeps HTTPS, apex-host, SPA rewrite rules, and large upload limits.
 
 ## Build Output
 
@@ -42,6 +42,7 @@ The release flow expects `dist/` to contain:
 - `index.html`
 - `assets/`
 - `.htaccess`
+- `.user.ini`
 - `robots.txt`
 - `sitemap.xml`
 
@@ -62,6 +63,7 @@ GitHub Actions also copies the PHP API files into `dist/api/` before the cPanel 
 - Public content is served through `public/api/content.php`.
 - Editable data is stored in `private/content.json` outside `public_html` on the server.
 - Uploads are stored in `/uploads/` with randomized file names.
+- Large media uploads are controlled by the deployed `.user.ini` and Apache request limits.
 
 ## First-Time Production Config
 

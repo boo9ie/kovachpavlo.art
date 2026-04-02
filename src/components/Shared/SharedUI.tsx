@@ -34,13 +34,14 @@ export const ExpandableText = ({ text, limit = 160, className = "text-sm text-gr
   const [isExpanded, setIsExpanded] = useState(false);
   const safeText = text || '';
   const shouldTruncate = safeText.length > limit;
+  const textClassName = `${className} whitespace-pre-line`;
 
   if (!shouldTruncate) {
-    return <div className={className}>{safeText}</div>;
+    return <div className={textClassName}>{safeText}</div>;
   }
 
   return (
-    <div className={className}>
+    <div className={textClassName}>
       {isExpanded ? safeText : `${safeText.substring(0, limit)}...`}
       <button 
         onClick={(e) => { e.preventDefault(); setIsExpanded(!isExpanded); }}
@@ -52,7 +53,17 @@ export const ExpandableText = ({ text, limit = 160, className = "text-sm text-gr
   );
 };
 
-export const MediaPreview = ({ item, isHovered, objectFit = 'cover' }: { item?: MediaItem, isHovered: boolean, objectFit?: 'contain' | 'cover' }) => {
+export const MediaPreview = ({
+  item,
+  isHovered,
+  objectFit = 'cover',
+  disableMonochrome = false
+}: {
+  item?: MediaItem;
+  isHovered: boolean;
+  objectFit?: 'contain' | 'cover';
+  disableMonochrome?: boolean;
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -105,7 +116,11 @@ export const MediaPreview = ({ item, isHovered, objectFit = 'cover' }: { item?: 
     setIsReady(true);
   };
 
-  const filterClass = isHovered ? 'grayscale-0 brightness-100' : 'grayscale brightness-90 contrast-125';
+  const filterClass = disableMonochrome
+    ? 'brightness-100 contrast-100'
+    : isHovered
+      ? 'grayscale-0 brightness-100'
+      : 'grayscale brightness-90 contrast-125';
 
   if (error) {
     return (

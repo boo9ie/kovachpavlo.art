@@ -38,11 +38,11 @@ export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
               onClick={() => setSelectedMedia(photo)}
             >
               {photo.type === 'video' ? (
-                <video key={photo.url} muted loop playsInline preload="none" className="w-full h-full object-cover grayscale group-hover/photo:grayscale-0 transition-all duration-700" onMouseEnter={e => e.currentTarget.play()} onMouseLeave={e => { e.currentTarget.pause(); e.currentTarget.currentTime = 0.7; }}>
+                <video key={photo.url} muted loop playsInline preload="none" className="w-full h-full object-cover transition-all duration-700" onMouseEnter={e => e.currentTarget.play()} onMouseLeave={e => { e.currentTarget.pause(); e.currentTarget.currentTime = 0.7; }}>
                   <source src={photo.url} type={photo.url.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
                 </video>
               ) : (
-                <img src={photo.url} alt={`${item.title} - ${idx}`} loading="lazy" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                <img src={photo.url} alt={`${item.title} - ${idx}`} loading="lazy" className="w-full h-full object-cover transition-all duration-700" />
               )}
               {photo.photographer && (
                 <div className="absolute bottom-4 left-4 bg-black/60 text-white text-[9px] px-3 py-1.5 font-bold uppercase tracking-widest transition-opacity duration-300">
@@ -56,8 +56,8 @@ export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
           ))}
         </div>
 
-        <button onClick={() => scroll('left')} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 border border-black p-4 uppercase text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">PREV</button>
-        <button onClick={() => scroll('right')} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 border border-black p-4 uppercase text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">NEXT</button>
+        <button onClick={() => scroll('left')} className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/90 border border-black px-3 py-2 md:px-3.5 md:py-2.5 uppercase text-[9px] font-bold tracking-[0.18em] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">PREV</button>
+        <button onClick={() => scroll('right')} className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/90 border border-black px-3 py-2 md:px-3.5 md:py-2.5 uppercase text-[9px] font-bold tracking-[0.18em] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">NEXT</button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-12 border-t border-black pt-12">
@@ -66,7 +66,7 @@ export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
           <MetadataLabel label="Venue" value={item.location} />
         </div>
         <div className="lg:col-span-8">
-          <div className="text-xl md:text-2xl text-black leading-relaxed font-medium">
+          <div className="text-xl md:text-2xl text-black leading-relaxed font-medium whitespace-pre-line">
             {item.description}
           </div>
         </div>

@@ -191,14 +191,26 @@ export const AdminPanel = ({
             };
             
             xhr.onload = () => {
-              if (xhr.status === 200) {
+              let payload: any = null;
+
+              if (xhr.responseText) {
                 try {
-                  resolve(JSON.parse(xhr.responseText));
+                  payload = JSON.parse(xhr.responseText);
+                } catch (e) {
+                  payload = null;
+                }
+              }
+
+              if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                  resolve(payload ?? JSON.parse(xhr.responseText));
                 } catch (e) {
                   reject(new Error("Invalid JSON response"));
                 }
+              } else if (xhr.status === 413) {
+                reject(new Error(payload?.error || 'Uploaded file exceeds the current server upload limit.'));
               } else {
-                reject(new Error(xhr.statusText));
+                reject(new Error(payload?.error || xhr.statusText || 'Upload failed'));
               }
             };
             

@@ -8,7 +8,7 @@ The GitHub Action in `.github/workflows/cpanel-deploy.yml` currently:
 1. Generate `package-lock.json` on the first run if it does not exist yet.
 2. Install dependencies with `npm ci`.
 3. Build the project using Node.js/Vite.
-4. Copy the production `.htaccess` file into `dist/.htaccess` during the build flow.
+4. Copy the production `.htaccess` and `.user.ini` files into `dist/` during the build flow.
 5. Run `php -l` on PHP API and utility scripts.
 6. Copy PHP backend files into `dist/api/`.
 7. Commit the built `dist/` output plus `package-lock.json` back into `main`.
@@ -22,7 +22,7 @@ After cPanel pulls the latest repository state and runs `.cpanel.yml`, deploymen
 
 This prevents deploys from overwriting the real production password hash or wiping live uploaded media.
 
-Before any cPanel deploy, confirm that `npm run build` produced `dist/.htaccess`. That file is part of the release artifact and carries the live HTTPS redirect, `www` to apex redirect, and SPA rewrite rules.
+Before any cPanel deploy, confirm that `npm run build` produced `dist/.htaccess` and `dist/.user.ini`. These files are part of the release artifact and carry the live HTTPS redirect, `www` to apex redirect, SPA rewrite rules, and PHP upload limits.
 
 `.cpanel.yml` must stay in the repository root for cPanel to execute it.
 The current `.cpanel.yml` uses absolute paths instead of exported shell variables so cPanel can execute each task deterministically.

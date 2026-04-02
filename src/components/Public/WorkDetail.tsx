@@ -69,7 +69,7 @@ export const WorkDetail = ({ items }: { items: WorkItem[] }) => {
             {item.title}
           </h2>
           <MetadataLabel label="Project Year" value={formatDate(item.date)} />
-          <div className="mt-8 text-xl text-black leading-relaxed font-medium">
+          <div className="mt-8 text-xl text-black leading-relaxed font-medium whitespace-pre-line">
             {item.description}
           </div>
         </div>

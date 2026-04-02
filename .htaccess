@@ -1,6 +1,9 @@
 # Disable directory browsing
 Options -Indexes
 
+# Allow large media uploads handled by PHP/cPanel limits
+LimitRequestBody 0
+
 # Prioritize our React App over legacy WordPress files
 DirectoryIndex index.html
 
