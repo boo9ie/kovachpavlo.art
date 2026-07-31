@@ -13,6 +13,9 @@ export const Home = ({ items }: { items: ExhibitionItem[] }) => {
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-8">
+      {/* The design carries no visible page title, but every page needs exactly
+          one h1 — and it must match public/_prerender.php. */}
+      <h1 className="sr-only">Pavlo Kovach — exhibitions by the Ukrainian artist and curator</h1>
       <div className="space-y-32">
         {sortedItems.map((item) => (
           <div key={item.id} className="grid grid-cols-1 lg:grid-cols-12 gap-12 border-b border-gray-100 pb-24 last:border-0 last:pb-0">

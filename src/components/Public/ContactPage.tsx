@@ -7,7 +7,7 @@ export const ContactPage = ({ data }: { data: ContactData }) => (
       <div className="absolute top-0 left-0 w-full h-1 bg-black group-hover:bg-[#b20000] transition-colors duration-500"></div>
       
       <div className="mb-12">
-        <h2 className="text-2xl font-bold tracking-tighter uppercase mb-1">Pavlo Kovach</h2>
+        <h1 className="text-2xl font-bold tracking-tighter uppercase mb-1">Pavlo Kovach</h1>
         <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Artist / Curator</p>
       </div>
 

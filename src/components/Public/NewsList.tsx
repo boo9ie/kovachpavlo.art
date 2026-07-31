@@ -6,6 +6,7 @@ const isExternalUrl = (value: string) => /^https?:\/\//i.test(value.trim());
 
 export const NewsList = ({ items }: { items: NewsItem[] }) => (
   <div className="max-w-[1000px] mx-auto px-4 md:px-8 py-12">
+    <h1 className="sr-only">News and press about Pavlo Kovach</h1>
     <div className="space-y-16">
       {[...items].sort((a, b) => {
           const dateA = a.date.split('.').reverse().join('-');

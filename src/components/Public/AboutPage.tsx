@@ -18,13 +18,14 @@ export const AboutPage = ({ data }: { data: AboutData }) => (
         </div>
       </div>
       <div className="md:col-span-8">
+        <h1 className="sr-only">About Pavlo Kovach</h1>
         <div className="text-lg md:text-xl text-black leading-relaxed space-y-6 whitespace-pre-wrap font-medium border-b border-black pb-12 mb-12">
           {data.text || 'Biography and exhibition history will be published soon.'}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
-            <h3 className="text-2xl font-bold uppercase mb-6">/ Solo Exhibitions</h3>
+            <h2 className="text-2xl font-bold uppercase mb-6">/ Solo Exhibitions</h2>
             {data.soloExhibitions.length > 0 ? (
               <ul className="space-y-3">
                 {data.soloExhibitions.map((item, idx) => (
@@ -36,7 +37,7 @@ export const AboutPage = ({ data }: { data: AboutData }) => (
             )}
           </div>
           <div>
-            <h3 className="text-2xl font-bold uppercase mb-6">/ Group Exhibitions</h3>
+            <h2 className="text-2xl font-bold uppercase mb-6">/ Group Exhibitions</h2>
             {data.groupExhibitions.length > 0 ? (
               <ul className="space-y-3">
                 {data.groupExhibitions.map((item, idx) => (
