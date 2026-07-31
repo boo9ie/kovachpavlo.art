@@ -24,13 +24,21 @@ if (PHP_SAPI !== 'cli') {
     exit(1);
 }
 
-$options = getopt('', ['apply', 'max-edge::', 'quality::', 'uploads::', 'originals::']);
+$options = getopt('', ['apply', 'max-edge::', 'quality::', 'uploads::', 'originals::', 'only::']);
 
 $apply     = isset($options['apply']);
 $maxEdge   = isset($options['max-edge']) ? (int) $options['max-edge'] : 2400;
 $quality   = isset($options['quality']) ? (int) $options['quality'] : 82;
 $uploadsDir   = $options['uploads']   ?? (getenv('HOME') . '/public_html/uploads');
 $originalsDir = $options['originals'] ?? (getenv('HOME') . '/private/uploads_originals');
+
+// --only=a.jpg,b.png restricts the run to specific basenames, so a small batch
+// can be checked on the live site before committing to all of them.
+$only = [];
+
+if (isset($options['only']) && $options['only'] !== '') {
+    $only = array_filter(array_map('trim', explode(',', (string) $options['only'])));
+}
 
 if (!is_dir($uploadsDir)) {
     fwrite(STDERR, "Uploads directory not found: {$uploadsDir}\n");
@@ -71,6 +79,10 @@ $failed      = 0;
 
 foreach ($files as $path) {
     if (!is_file($path)) {
+        continue;
+    }
+
+    if ($only !== [] && !in_array(basename($path), $only, true)) {
         continue;
     }
 
