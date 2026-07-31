@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { WorkItem, MediaItem } from '../../types';
 import { MetadataLabel } from '../Shared/SharedUI';
+import { NotFound } from './NotFound';
 import { formatDate } from '../../utils/formatDate';
 
 export const WorkDetail = ({ items }: { items: WorkItem[] }) => {
@@ -15,7 +16,9 @@ export const WorkDetail = ({ items }: { items: WorkItem[] }) => {
     }
   }, [item]);
 
-  if (!item) return <div className="p-24 text-center uppercase font-bold text-gray-400">Work not found</div>;
+  // Same treatment as any unknown URL: index.php answers 404 for a missing id,
+  // so the rendered page should match it (and carry an h1).
+  if (!item) return <NotFound />;
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-8">
@@ -65,9 +68,9 @@ export const WorkDetail = ({ items }: { items: WorkItem[] }) => {
         </div>
 
         <div className="lg:col-span-4 border-t-2 border-black pt-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight tracking-normal">
+          <h1 className="text-3xl md:text-4xl font-bold mb-6 leading-tight tracking-normal">
             {item.title}
-          </h2>
+          </h1>
           <MetadataLabel label="Project Year" value={formatDate(item.date)} />
           <div className="mt-8 text-xl text-black leading-relaxed font-medium whitespace-pre-line">
             {item.description}

@@ -13,6 +13,7 @@ export const WorksPage = ({ items }: { items: WorkItem[] }) => {
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-8">
+      <h1 className="sr-only">Works by Pavlo Kovach</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mt-8">
         {sortedItems.map((item) => (
           <Link 
@@ -31,7 +32,7 @@ export const WorksPage = ({ items }: { items: WorkItem[] }) => {
             </div>
             <div className="border-t border-black pt-4">
                <div className="flex justify-between items-start">
-                 <h3 className="text-xl font-bold leading-tight group-hover:text-[#b20000] transition-colors">{item.title}</h3>
+                 <h2 className="text-xl font-bold leading-tight group-hover:text-[#b20000] transition-colors">{item.title}</h2>
                  <span className="text-xs font-bold text-black">{formatDate(item.date)}</span>
                </div>
                <ExpandableText 

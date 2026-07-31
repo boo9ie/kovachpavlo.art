@@ -23,6 +23,7 @@ import { NewsList } from './components/Public/NewsList';
 import { WorksPage } from './components/Public/WorksPage';
 import { AboutPage } from './components/Public/AboutPage';
 import { ContactPage } from './components/Public/ContactPage';
+import { NotFound } from './components/Public/NotFound';
 import { AdminPanel } from "./components/Admin/AdminPanel";
 
 const IS_DEVELOPMENT = import.meta.env.DEV;
@@ -76,16 +77,27 @@ const isValidContentPayload = (value: any): value is {
   );
 };
 
+// index.php inlines the live content into the page, so the first paint needs no
+// network round-trip. Falls back to /api/content.php when the shell is served
+// statically (dev server, or index.html fallback if PHP is unavailable).
+const BOOTSTRAP_CONTENT = (() => {
+  if (typeof window === 'undefined') return null;
+  const value = (window as any).__BOOTSTRAP__;
+  return isValidContentPayload(value) ? value : null;
+})();
+
 export default function App() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [exhibitions, setExhibitions] = useState<ExhibitionItem[]>([]);
-  const [works, setWorks] = useState<WorkItem[]>([]);
-  const [about, setAbout] = useState<AboutData>(IS_DEVELOPMENT ? INITIAL_ABOUT : EMPTY_ABOUT);
-  const [contact, setContact] = useState<ContactData>(IS_DEVELOPMENT ? INITIAL_CONTACT : EMPTY_CONTACT);
+  const [isLoaded, setIsLoaded] = useState(BOOTSTRAP_CONTENT !== null);
+  const [news, setNews] = useState<NewsItem[]>(BOOTSTRAP_CONTENT?.news ?? []);
+  const [exhibitions, setExhibitions] = useState<ExhibitionItem[]>(BOOTSTRAP_CONTENT?.exhibitions ?? []);
+  const [works, setWorks] = useState<WorkItem[]>(BOOTSTRAP_CONTENT?.works ?? []);
+  const [about, setAbout] = useState<AboutData>(BOOTSTRAP_CONTENT?.about ?? (IS_DEVELOPMENT ? INITIAL_ABOUT : EMPTY_ABOUT));
+  const [contact, setContact] = useState<ContactData>(BOOTSTRAP_CONTENT?.contact ?? (IS_DEVELOPMENT ? INITIAL_CONTACT : EMPTY_CONTACT));
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (BOOTSTRAP_CONTENT !== null) return;
+
     const applyContent = (content: {
       news: NewsItem[];
       exhibitions: ExhibitionItem[];
@@ -158,6 +170,10 @@ export default function App() {
     return (
       <BrowserRouter>
         <div className="min-h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white">
+          {/* Without this the error page kept the shell's title and its
+              canonical pointing at "/", so every route looked like the same
+              empty duplicate to crawlers. noindex keeps it out of the index. */}
+          <SeoManager exhibitions={[]} works={[]} forceNoindex />
           <Navigation />
           <main className="flex-grow flex items-center justify-center px-4 md:px-8">
             <div className="max-w-xl border-2 border-black bg-white p-10 text-center shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
@@ -195,6 +211,9 @@ export default function App() {
                 contact={contact} setContact={setContact}
               />
             } />
+            {/* Unknown paths used to render an empty <main> with HTTP 200,
+                which Google treats as a soft 404. */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
 

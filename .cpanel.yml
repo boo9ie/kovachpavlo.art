@@ -2,7 +2,18 @@
 deployment:
   tasks:
     - '/bin/mkdir -p /home/kovachpa/private'
+    - '/bin/mkdir -p /home/kovachpa/private/deploy-backups'
+    # Snapshot live content before the public_html wipe below. content.json and
+    # config.php live outside public_html and are not touched by the deploy, but
+    # a copy costs nothing and this is the only irreplaceable data on the box.
+    - 'if [ -f /home/kovachpa/private/content.json ]; then /bin/cp -p /home/kovachpa/private/content.json /home/kovachpa/private/deploy-backups/content-$(date +%Y%m%d-%H%M%S).json; fi'
+    # Keep the 20 most recent snapshots.
+    - '/bin/ls -1t /home/kovachpa/private/deploy-backups/content-*.json 2>/dev/null | /usr/bin/tail -n +21 | /usr/bin/xargs -r /bin/rm -f'
     - 'if [ ! -f /home/kovachpa/private/config.php ]; then /bin/cp -p private/config.example.php /home/kovachpa/private/config.php; echo "Created /home/kovachpa/private/config.php from private/config.example.php. Set ADMIN_PASSWORD_HASH before using /admin."; fi'
     - 'if [ ! -f /home/kovachpa/private/content.json ]; then /bin/cp -p private/content.json /home/kovachpa/private/content.json; fi'
+    # Refuse to deploy a build that has no index.php — that would take the site
+    # down and leave only the static fallback shell.
+    - 'if [ ! -f dist/index.php ]; then echo "ABORT: dist/index.php missing — run npm run build"; exit 1; fi'
+    # Wipes public_html except .well-known and uploads (user media, ~1.4 GB).
     - '/bin/find /home/kovachpa/public_html/ -mindepth 1 -maxdepth 1 ! -name .well-known ! -name uploads -exec /bin/rm -rf {} +'
     - '/bin/cp -R dist/. /home/kovachpa/public_html/'

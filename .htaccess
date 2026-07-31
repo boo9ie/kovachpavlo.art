@@ -4,8 +4,9 @@ Options -Indexes
 # Allow large media uploads handled by PHP/cPanel limits
 LimitRequestBody 0
 
-# Prioritize our React App over legacy WordPress files
-DirectoryIndex index.html
+# index.php prerenders <head> and content for crawlers, then hands over to React.
+# index.html stays as a static fallback if PHP is ever unavailable.
+DirectoryIndex index.php index.html
 
 # Enable BrowserRouter (SPA) Fallback
 <IfModule mod_rewrite.c>
@@ -16,19 +17,30 @@ DirectoryIndex index.html
   RewriteCond %{HTTP_HOST} ^pavlokovach\.art$ [NC]
   RewriteRule ^ https://pavlokovach.art%{REQUEST_URI} [R=301,L]
   RewriteBase /
-  RewriteRule ^index\.html$ - [L]
+
+  # Sitemap is generated from the live content.json.
+  RewriteRule ^sitemap\.xml$ /sitemap.php [L]
+
+  # Internal include — never serve it directly.
+  RewriteRule ^_prerender\.php$ - [F,L]
+
+  # /index.html and /index.php are reachable duplicates of "/". Matching on
+  # THE_REQUEST (the literal request line) means the internal DirectoryIndex
+  # subrequest for "/" does not match, so this cannot loop.
+  RewriteCond %{THE_REQUEST} \s/index\.(html|php)[\s?] [NC]
+  RewriteRule ^index\.(html|php)$ / [R=301,L]
+
   RewriteCond %{REQUEST_URI} !^/api/
   RewriteCond %{REQUEST_URI} !^/uploads/
   RewriteCond %{REQUEST_URI} !^/robots\.txt$
-  RewriteCond %{REQUEST_URI} !^/sitemap\.xml$
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+  RewriteRule . /index.php [L]
 </IfModule>
 
 # Enable Gzip Compression
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/json
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/json image/svg+xml application/xml
 </IfModule>
 
 # Browser Caching
@@ -37,12 +49,22 @@ DirectoryIndex index.html
   ExpiresDefault "access plus 1 month"
   ExpiresByType text/html "access plus 0 seconds"
   ExpiresByType application/json "access plus 0 seconds"
+  ExpiresByType application/xml "access plus 0 seconds"
   ExpiresByType image/x-icon "access plus 1 year"
   ExpiresByType image/jpeg "access plus 1 year"
   ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
   ExpiresByType video/mp4 "access plus 1 year"
   ExpiresByType text/css "access plus 1 month"
   ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# Vite emits content-hashed filenames (index-YFnAN_39.js), so a new build is a
+# new URL — these can be cached permanently.
+<IfModule mod_headers.c>
+  <FilesMatch "-[A-Za-z0-9_-]{8,}\.(js|css)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
 </IfModule>
 
 # Security Headers

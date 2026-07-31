@@ -69,7 +69,9 @@ if ($finfo === false) {
 }
 
 $mimeType = finfo_file($finfo, $file['tmp_name']);
-finfo_close($finfo);
+// finfo_close() is deprecated as of PHP 8.5 (the handle is freed automatically)
+// and was filling api/error_log with a warning on every single upload.
+unset($finfo);
 
 if ($mimeType === false) {
     json_response(['error' => 'Failed to inspect uploaded file'], 500);
@@ -97,7 +99,99 @@ if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)
 $newFileName = bin2hex(random_bytes(16)) . '.' . $extension;
 $destination = $uploadDir . $newFileName;
 
+/**
+ * Downscale oversized images in place.
+ *
+ * Originals were stored untouched, which put single 8-12 MB photos on the
+ * homepage (~30 MB per page load) and made the render slow enough to hurt both
+ * visitors and crawlers. Anything that cannot be processed safely is left
+ * exactly as uploaded — never fail an upload over optimisation.
+ */
+function downscale_image(string $path, string $mimeType, int $maxEdge = 2400, int $quality = 82): void
+{
+    static $loaders = [
+        'image/jpeg' => ['imagecreatefromjpeg', 'imagejpeg'],
+        'image/png'  => ['imagecreatefrompng', 'imagepng'],
+        'image/webp' => ['imagecreatefromwebp', 'imagewebp'],
+    ];
+
+    if (!extension_loaded('gd') || !isset($loaders[$mimeType])) {
+        return;
+    }
+
+    [$loader, $writer] = $loaders[$mimeType];
+
+    if (!function_exists($loader) || !function_exists($writer)) {
+        return;
+    }
+
+    $size = @getimagesize($path);
+
+    if ($size === false) {
+        return;
+    }
+
+    [$width, $height] = $size;
+
+    if ($width <= 0 || $height <= 0 || max($width, $height) <= $maxEdge) {
+        return;
+    }
+
+    // GD holds the full bitmap in RAM; bail out instead of hitting the limit.
+    $memoryLimit = ini_size_to_bytes((string) ini_get('memory_limit'));
+    $estimated = (int) ($width * $height * 4 * 2.2);
+
+    if ($memoryLimit > 0 && $estimated > $memoryLimit - memory_get_usage(true)) {
+        return;
+    }
+
+    $source = @$loader($path);
+
+    if ($source === false) {
+        return;
+    }
+
+    $ratio = $maxEdge / max($width, $height);
+    $targetWidth = max(1, (int) round($width * $ratio));
+    $targetHeight = max(1, (int) round($height * $ratio));
+
+    $target = imagecreatetruecolor($targetWidth, $targetHeight);
+
+    if ($target === false) {
+        imagedestroy($source);
+        return;
+    }
+
+    if ($mimeType === 'image/png' || $mimeType === 'image/webp') {
+        imagealphablending($target, false);
+        imagesavealpha($target, true);
+    }
+
+    if (!imagecopyresampled($target, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height)) {
+        imagedestroy($source);
+        imagedestroy($target);
+        return;
+    }
+
+    // Write to a temp file first so a failure never truncates the upload.
+    $tempPath = $path . '.opt';
+    $written = $mimeType === 'image/png'
+        ? @imagepng($target, $tempPath, 8)
+        : @$writer($target, $tempPath, $quality);
+
+    imagedestroy($source);
+    imagedestroy($target);
+
+    if ($written && is_file($tempPath) && filesize($tempPath) > 0 && filesize($tempPath) < filesize($path)) {
+        @rename($tempPath, $path);
+    } elseif (is_file($tempPath)) {
+        @unlink($tempPath);
+    }
+}
+
 if (move_uploaded_file($file['tmp_name'], $destination)) {
+    downscale_image($destination, $mimeType);
+
     json_response([
         'success' => true,
         'url' => '/uploads/' . $newFileName,

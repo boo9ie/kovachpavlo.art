@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ExhibitionItem, MediaItem } from '../../types';
 import { MetadataLabel } from '../Shared/SharedUI';
+import { NotFound } from './NotFound';
 import { formatDate } from '../../utils/formatDate';
 
 export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
@@ -10,7 +11,9 @@ export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  if (!item) return <div className="p-24 text-center uppercase font-bold text-gray-400">Exhibition not found</div>;
+  // Same treatment as any unknown URL: index.php answers 404 for a missing id,
+  // so the rendered page should match it (and carry an h1).
+  if (!item) return <NotFound />;
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -22,6 +25,10 @@ export const ExhibitionDetail = ({ items }: { items: ExhibitionItem[] }) => {
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-8">
+      {/* This layout shows no title anywhere, so the page had no h1 at all.
+          Kept visually hidden to leave the design untouched; mirrors
+          public/_prerender.php. */}
+      <h1 className="sr-only">{item.title}</h1>
       <div className="mb-12">
         <Link to="/" className="text-[10px] font-bold uppercase text-gray-400 hover:text-black mb-8 inline-block tracking-widest">← BACK TO LIST</Link>
       </div>

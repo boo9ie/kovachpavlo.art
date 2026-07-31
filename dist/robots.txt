@@ -1,7 +1,15 @@
 User-agent: *
 Allow: /
-Disallow: /api/
-Disallow: /private/
+
+# /api/content.php MUST stay crawlable: the SPA fetches it while rendering.
+# Blocking all of /api/ made Googlebot render an empty "content unavailable"
+# page on every URL, which took the whole site out of the index.
 Disallow: /admin
+Disallow: /private/
+Disallow: /api/save.php
+Disallow: /api/login.php
+Disallow: /api/logout.php
+Disallow: /api/upload.php
+Disallow: /api/auth-status.php
 
 Sitemap: https://pavlokovach.art/sitemap.xml

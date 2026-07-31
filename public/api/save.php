@@ -169,6 +169,64 @@ $payload = [
 ];
 
 $file = __DIR__ . '/../../private/content.json';
+$historyDir = __DIR__ . '/../../private/history';
+
+/**
+ * Every save rewrites the whole content tree, and the client persists on any
+ * state change — so a stale admin tab could silently flatten the site with no
+ * way back. Two safeguards below: refuse the obviously-destructive case, and
+ * keep a rolling history of previous versions for everything else.
+ */
+
+$existing = null;
+
+if (is_file($file)) {
+    $existingRaw = file_get_contents($file);
+
+    if ($existingRaw !== false) {
+        $decodedExisting = json_decode($existingRaw, true);
+
+        if (is_array($decodedExisting)) {
+            $existing = $decodedExisting;
+        }
+    }
+}
+
+if ($existing !== null) {
+    $incomingIsEmpty =
+        count($payload['news']) === 0 &&
+        count($payload['exhibitions']) === 0 &&
+        count($payload['works']) === 0;
+
+    $existingHasContent =
+        count((array) ($existing['news'] ?? [])) > 0 ||
+        count((array) ($existing['exhibitions'] ?? [])) > 0 ||
+        count((array) ($existing['works'] ?? [])) > 0;
+
+    // Wiping news, exhibitions and works all at once is far more likely to be a
+    // failed load than an intentional edit. Require an explicit override.
+    if ($incomingIsEmpty && $existingHasContent && !isset($_GET['force'])) {
+        json_response([
+            'error' => 'Refusing to replace existing content with an empty payload. Reload the admin panel and try again.',
+        ], 409);
+    }
+
+    // Snapshot the current file before overwriting it.
+    if (is_dir($historyDir) || mkdir($historyDir, 0700, true) || is_dir($historyDir)) {
+        @copy($file, $historyDir . '/content-' . date('Ymd-His') . '-' . substr(uniqid(), -4) . '.json');
+
+        $snapshots = glob($historyDir . '/content-*.json') ?: [];
+
+        if (count($snapshots) > 50) {
+            sort($snapshots);
+
+            foreach (array_slice($snapshots, 0, count($snapshots) - 50) as $stale) {
+                @unlink($stale);
+            }
+        }
+    }
+}
+
 $tempFile = $file . '.' . uniqid() . '.tmp';
 
 if (file_put_contents($tempFile, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false) {
