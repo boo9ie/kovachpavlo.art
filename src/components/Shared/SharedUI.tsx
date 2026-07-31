@@ -68,6 +68,7 @@ export const MediaPreview = ({
   alt?: string;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const [error, setError] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
@@ -83,6 +84,17 @@ export const MediaPreview = ({
     setError(false);
     setIsReady(false);
   }, [item?.url]);
+
+  // An image served from cache can finish loading before React attaches onLoad.
+  // The event is then missed, isReady stays false, and the tile sits at
+  // opacity-0 behind a spinner forever. Check the element directly instead.
+  useEffect(() => {
+    const image = imageRef.current;
+
+    if (image && image.complete && image.naturalWidth > 0) {
+      setIsReady(true);
+    }
+  }, [item?.url, item?.type]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -168,8 +180,9 @@ export const MediaPreview = ({
           <source src={item.url} type={item.url.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
         </video>
       ) : (
-        <img 
-          src={item.url} 
+        <img
+          ref={imageRef}
+          src={item.url}
           alt={alt}
           loading="lazy"
           onLoad={() => setIsReady(true)}
