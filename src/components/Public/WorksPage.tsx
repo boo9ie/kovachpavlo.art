@@ -28,6 +28,7 @@ export const WorksPage = ({ items }: { items: WorkItem[] }) => {
                 item={(item.media || [])[0]} 
                 isHovered={hoveredId === item.id} 
                 objectFit="contain"
+                alt={item.title}
               />
             </div>
             <div className="border-t border-black pt-4">

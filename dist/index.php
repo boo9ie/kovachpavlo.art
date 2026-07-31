@@ -467,7 +467,7 @@ $bootstrap = $content === null ? null : json_encode(
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
 
     <script type="application/ld+json"><?= $jsonLdPayload ?></script>
-    <script type="module" crossorigin src="/assets/index-B-7dbmu3.js"></script>
+    <script type="module" crossorigin src="/assets/index-BOhU6h2n.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-B2iqu5bU.js">
     <link rel="stylesheet" crossorigin href="/assets/index-FZbW8-U7.css">
 </head>

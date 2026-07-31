@@ -57,12 +57,15 @@ export const MediaPreview = ({
   item,
   isHovered,
   objectFit = 'cover',
-  disableMonochrome = false
+  disableMonochrome = false,
+  alt = ''
 }: {
   item?: MediaItem;
   isHovered: boolean;
   objectFit?: 'contain' | 'cover';
   disableMonochrome?: boolean;
+  /** Describes the artwork or exhibition this preview belongs to. */
+  alt?: string;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState(false);
@@ -167,7 +170,8 @@ export const MediaPreview = ({
       ) : (
         <img 
           src={item.url} 
-          alt="Preview" 
+          alt={alt}
+          loading="lazy"
           onLoad={() => setIsReady(true)}
           onError={() => setError(true)}
           className={`w-full h-full object-${objectFit} transition-opacity duration-1000 ease-in-out ${filterClass} ${isReady ? 'opacity-100' : 'opacity-0'}`} 
